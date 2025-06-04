@@ -1,0 +1,250 @@
+@charset "UTF-8";
+
+:root{
+	--gris_fonce: #757575;
+	--gris_clair: #EEEEEE;
+	--blanc: #FFFFFF;
+	--noir: #000000;
+}
+html{
+	background-color:var(--blanc);
+	color:var(--noir);
+	
+	font-family:Segoe UI, Arial, sans serif;
+}
+body{
+	font-size:.9rem;
+}
+
+main{
+	width:90%;
+	
+	margin: 0 auto;
+	padding: 10px 0 20px 0;
+	
+}
+h1{
+	font-weight:700;
+	font-size:2rem;
+	padding:5px 0px;
+}
+h2{
+	font-weight:700;
+	font-size:1.5rem;
+	padding:5px 0px;
+}
+h3{
+	font-weight:700;
+	font-size:1rem;
+	padding:5px 0px;
+}
+h4{
+	font-weight:700;
+	font-style:italic;
+	font-size:0.9rem;
+	padding:5px 0px;
+}
+/***************************************************** FORMULAIRE ********************/
+#formulaire{
+}
+
+form *{
+	width:100%;
+}
+
+form label{
+	font-weight:700;
+	font-size:1rem;
+	padding:5px 0px;
+}
+
+input, textarea, select{
+	border: 1px dotted var(--gris_fonce);
+	font-family:inherit;
+	font-weight:inherit;
+	font-size:inherit;
+	padding:3px 0px;
+	background-color:var(--blanc);
+}
+
+#thread_intro{
+	height:calc(6*16px);
+}
+
+#thread_content{
+	height:150px;
+}
+
+button[type="submit"]{
+	text-align:center;
+	height:150px;
+	font-family:inherit;
+	font-weight:900;
+	font-size:1rem;
+	border:1px dotted var(--gris_fonce);
+	background-color:var(--gris_clair);
+	margin-bottom:20px;
+}
+button[type="submit"]:hover{
+	cursor:pointer;
+	background-color:var(--gris_fonce);
+	color:var(--blanc);
+}
+/***************************************************** RESULTATS ********************/
+#resultats{
+	/* border:1px solid var(--gris_fonce); */
+}
+
+#resultats .segment{
+	text-align:right;
+}
+
+#resultats p{
+	background-color:#EEEEEE;
+	padding:10px 5px;
+	text-align:left;
+}
+
+#resultats button.copy{
+	text-align:center;
+	/* height:30px; */
+	font-family:inherit;
+	font-weight:700;
+	font-size:.8rem;
+	border:1px dotted var(--gris_fonce);
+	background-color:var(--gris_clair);
+	margin-bottom:5px;
+	margin-top:-30px;
+}
+
+#resultats button.checked{
+	background-color:#95FC9A;
+}
+
+.informations{
+	font-size:0.75rem;
+	font-style:italic;
+	color:var(--gris_fonce);
+	padding:5px 0px;
+}
+
+hr{
+	border:none;
+	border-top: 1px dotted var(--gris_fonce);
+}
+
+/* .visually-hidden { */
+  /* clip: rect(0 0 0 0); */
+  /* clip-path: inset(50%); */
+  /* height: 1px; */
+  /* overflow: hidden; */
+  /* position: absolute; */
+  /* white-space: nowrap; */
+  /* width: 1px; */
+/* } */
+
+.tabs {
+  /* font-family: "lucida grande", sans-serif; */
+}
+
+[role="tablist"] {
+  /* min-width: 100%; */
+}
+
+[role="tab"]{
+	border:none;
+}
+
+[role="tab"]:focus,
+[role="tab"]:hover {
+	outline: 2px dotted var(--gris_fonce);
+	/* border:none; */
+}
+
+[role="tab"][aria-selected="true"] {
+  /* padding: 2px 2px 4px; */
+  /* margin-top: 0; */
+  /* border-width: 2px; */
+  /* border-top-width: 6px; */
+  /* border-top-color: rgb(36 116 214); */
+  /* border-bottom-color: hsl(220deg 43% 99%); */
+  /* background: hsl(220deg 43% 99%); */
+  border: none;
+  border-bottom: 3px solid blue;
+}
+
+[role="tab"][aria-selected="false"] {
+  /* border-bottom: 1px solid hsl(219deg 1% 72%); */
+}
+
+
+[role="tab"]:hover span.focus,
+[role="tab"]:focus span.focus,
+[role="tab"]:active span.focus {
+  /* padding: 2px 4px; */
+  /* border: 2px solid rgb(36 116 214); */
+  /* border-radius: 3px; */
+}
+
+[role="tabpanel"] {
+  /* padding: 5px; */
+  /* border: 2px solid hsl(219deg 1% 72%); */
+  /* border-radius: 0 5px 5px; */
+  /* background: hsl(220deg 43% 99%); */
+  /* min-height: 10em; */
+  /* width: 100%; */
+  /* overflow: auto; */
+  
+  margin-top:5px;
+}
+
+[role="tabpanel"].is-hidden {
+  display: none;
+}
+
+.ctrl_length{
+	font-weight:700;
+	padding:10px 0px;
+}
+
+[role="tabpanel"] .ok span.length {
+  color: green;
+}
+[role="tabpanel"] .ko span.length {
+  color: red;
+}
+[role="tabpanel"] .warning span.length {
+  color: orange;
+}
+[role="tabpanel"] .alert span.length {
+  color: white;
+  background-color:red;
+  padding:0 2px;  
+}
+
+
+/***************************************************** FOOTER ********************/
+footer{
+	margin: 20px auto;
+    text-align: center;
+    display: block;
+    width: 100%;
+    font-size: 0.75em;
+}
+
+footer a img, footer a, footer a:visited, footer a:active {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+footer a:hover {
+    text-decoration: underline;
+}
+
+footer img {
+    width: 15px;
+    padding: 5px;
+	margin-top:5px;
+    border: 2px solid #000000;
+    border-radius: 50px;
+}

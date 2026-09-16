@@ -57,6 +57,7 @@ $libellesStatut = [
 		</header>
 		<main role="main">
 			<?php $pageCourante = "planifications"; include __DIR__."/lib/nav.php"; ?>
+			<button id="bouton_densite" type="button" onclick="basculerDensite()">↕️ Compact</button>
 
 			<h2>Publications programmées</h2>
 			<p class="informations">

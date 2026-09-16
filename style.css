@@ -272,6 +272,14 @@ button[type="submit"]:focus-visible{
 	outline-offset: 2px;
 }
 
+nav[aria-label="Navigation principale"]{
+	margin-bottom: var(--space-4);
+}
+nav[aria-label="Navigation principale"] strong[aria-current="page"]{
+	color: var(--color-accent-text);
+	text-decoration: underline;
+}
+
 .notification_publication{
 	font-size: .75rem;
 	align-self: center;

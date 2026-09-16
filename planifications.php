@@ -56,7 +56,7 @@ $libellesStatut = [
 			<button id="bouton_theme" type="button" onclick="basculerTheme()">🌙 Mode sombre</button>
 		</header>
 		<main role="main">
-			<p><a href="./index.php">← Retour au générateur</a> · <a href="./comptes.php">Gérer les comptes</a> · <a href="./historique.php">Historique</a> · <a href="./logout.php">Se déconnecter</a></p>
+			<?php $pageCourante = "planifications"; include __DIR__."/lib/nav.php"; ?>
 
 			<h2>Publications programmées</h2>
 			<p class="informations">

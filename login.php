@@ -22,6 +22,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 <html lang="fr" dir="ltr">
 	<head>
 		<meta charset="UTF-8">
+		<?php include __DIR__."/lib/theme_init.php"; ?>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Connexion — Thread Maker</title>
 		<link rel="stylesheet" href="./reset.css" />
@@ -31,6 +32,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 	<body>
 		<header role="banner">
 			<h1>Thread Maker</h1>
+			<button id="bouton_theme" type="button" onclick="basculerTheme()">🌙 Mode sombre</button>
 		</header>
 		<main role="main">
 			<div id="formulaire">
@@ -46,5 +48,6 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 				</form>
 			</div>
 		</main>
+		<script src="./theme-toggle.js"></script>
 	</body>
 </html>

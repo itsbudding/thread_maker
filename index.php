@@ -10,6 +10,7 @@ Auth::exigerConnexion();
 <html lang="fr" dir="ltr">
 	<head>
 		<meta charset="UTF-8">
+		<?php include __DIR__."/lib/theme_init.php"; ?>
 		<meta name="description" content="Création de threads pour les réseaux sociaux">
 		<meta name="keywords" content="">
 		<meta name="author" content="It's Budding">
@@ -334,6 +335,7 @@ Auth::exigerConnexion();
 	<body>
 		<header role="banner">
 			<h1>Thread Maker</h1>
+			<button id="bouton_theme" type="button" onclick="basculerTheme()">🌙 Mode sombre</button>
 		</header>
 		<p id="lien_comptes"><a href="./comptes.php">Gérer les comptes</a> · <a href="./historique.php">Historique</a> · <a href="./planifications.php">Publications programmées</a> · <a href="./logout.php">Se déconnecter</a></p>
 		<main role="main">
@@ -448,5 +450,6 @@ Auth::exigerConnexion();
 			// selectTheme(document.getElementById('thread_theme'),'<?php echo $valeurs->theme ?>');
 		</script>
 		<script src="./script.js"></script>
+		<script src="./theme-toggle.js"></script>
 	</body>
 </html>

@@ -20,6 +20,7 @@ $publications = $pdo->query("
 <html lang="fr" dir="ltr">
 	<head>
 		<meta charset="UTF-8">
+		<?php include __DIR__."/lib/theme_init.php"; ?>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Historique — Thread Maker</title>
 		<link rel="stylesheet" href="./reset.css" />
@@ -29,6 +30,7 @@ $publications = $pdo->query("
 	<body>
 		<header role="banner">
 			<h1>Thread Maker</h1>
+			<button id="bouton_theme" type="button" onclick="basculerTheme()">🌙 Mode sombre</button>
 		</header>
 		<main role="main">
 			<p><a href="./index.php">← Retour au générateur</a> · <a href="./comptes.php">Gérer les comptes</a> · <a href="./planifications.php">Publications programmées</a> · <a href="./logout.php">Se déconnecter</a></p>
@@ -77,5 +79,6 @@ $publications = $pdo->query("
 				</table>
 			<?php endif; ?>
 		</main>
+		<script src="./theme-toggle.js"></script>
 	</body>
 </html>

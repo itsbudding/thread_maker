@@ -16,6 +16,14 @@ body{
 	font-size:.9rem;
 }
 
+header{
+	width:90%;
+	
+	margin: 0 auto;
+	padding: 10px 0 20px 0;
+	
+}
+
 main{
 	width:90%;
 	
@@ -44,6 +52,15 @@ h4{
 	font-size:0.9rem;
 	padding:5px 0px;
 }
+
+#identite_row{
+	display:flex;
+}
+#identite_row img{
+	height:30px;
+	width:30px;
+}
+
 /***************************************************** FORMULAIRE ********************/
 #formulaire{
 }
@@ -133,15 +150,15 @@ hr{
 	border-top: 1px dotted var(--gris_fonce);
 }
 
-/* .visually-hidden { */
-  /* clip: rect(0 0 0 0); */
-  /* clip-path: inset(50%); */
-  /* height: 1px; */
-  /* overflow: hidden; */
-  /* position: absolute; */
-  /* white-space: nowrap; */
-  /* width: 1px; */
-/* } */
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
 
 .tabs {
   /* font-family: "lucida grande", sans-serif; */

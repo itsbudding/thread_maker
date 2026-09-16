@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
 	<head>
@@ -123,10 +122,11 @@
 	
 	class tmForm{
 		
-		public $theme = "itsbudding";
+		public $theme = "none";
 		public $prefixe = "";
 		public $suffixe = "🧵⬇️";
-		public $hashtags = "#itsbudding";
+		// public $hashtags = "#itsbudding";
+		public $hashtags = "";
 		public $content = "";
 		
 		public $twitter;
@@ -137,8 +137,7 @@
 		public $facebook;
 		public $youtube;
 		// public $linkedin;
-		
-		
+				
 		function __construct(array $values){
 			if(isset($values["thread_theme"])) $this->theme = $values["thread_theme"];
 			if(isset($values["thread_habillage_prefixe"])) $this->prefixe = $values["thread_habillage_prefixe"];
@@ -185,28 +184,33 @@
 
 ?>
 	<body>
-		<main>
+		<header role="banner">
 			<h1>Thread Maker</h1>
+		</header>
+		<main role="main">
 			<div id="formulaire">
 				<h2 id="form_lbl" class="visually-hidden">Formulaire de saisie</h2>
 				<form action="./" method="post">
-					<h3 id="thread_theme_lbl">Thème</h3>
-					<select aria-labelledby="thread_theme_lbl" id="thread_theme" name="thread_theme" onchange="fill_hashtags(this);">
-						<option value="none">-----</option>
-						<option value="a11y">accessibilité</option>
-						<option value="lego">lego</option>
-						<option value="itsbudding">itsbudding</option>
-						<option value="scc">scc</option>
-					</select>
+					<h3 id="thread_theme_lbl">Identité</h3>
+					<div id="identite_row">
+						<img id="thread_theme_img" src="./img/default.png" alt="" />
+						<select aria-labelledby="thread_theme_lbl" id="thread_theme" name="thread_theme" onchange="fill_hashtags(this); fill_img(this);">
+							<option value="none">-----</option>
+							<option value="lego">It's Bricking</option>
+							<option value="itsbudding">It's Budding</option>
+							<option value="scc">Sporting Culture Club</option>
+							<option value="a11y">Cap Accessibilité</option>
+						</select>
+					</div>
 					<hr/>
 					<h3>Habillage</h3>
 					<h4 id="thread_habillage_prefixe_lbl">Préfixe</h4>
 					<input aria-labelledby="thread_habillage_prefixe_lbl" type="text" id="thread_habillage_prefixe" name="thread_habillage_prefixe" value="<?php echo $valeurs->prefixe ?>" />
 					<h4 id="thread_habillage_suffixe_lbl">Suffixe</h4>
-					<p class="informations">
+					<p id="suffixe_informations" class="informations">
 						La pagination sera ajouté automatiquement.
 					</p>
-					<input aria-labelledby="thread_habillage_suffixe_lbl" type="text" id="thread_habillage_suffixe" name="thread_habillage_suffixe" value="<?php echo $valeurs->suffixe ?>" />
+					<input aria-labelledby="thread_habillage_suffixe_lbl" aria-describedby="suffixe_informations" type="text" id="thread_habillage_suffixe" name="thread_habillage_suffixe" value="<?php echo $valeurs->suffixe ?>" />
 					<hr/>
 					<h3 id="thread_hashtags_lbl">Hashtags</h3>
 					<input aria-labelledby="thread_hashtags_lbl" type="text" id="thread_hashtags" name="thread_hashtags" value="<?php echo unstringifyHashtags($valeurs->hashtags); ?>" />
@@ -214,10 +218,10 @@
 					<h3 id="thread_content_lbl">Contenu</h3>
 					<textarea aria-labelledby="thread_content_lbl" id="thread_content" name="thread_content"><?php echo $valeurs->content ?></textarea>
 					<hr/>
-					<p class="informations">
+					<p id="creer_fil_informations" class="informations">
 						Les résultats s'afficheront sous le bouton, une fois le formulaire soumis.
 					</p>
-					<button type="submit">Créer un fil</button>
+					<button type="submit" aria-describedby="creer_fil_informations">Créer un fil</button>
 				</form>
 			</div>
 
@@ -226,14 +230,14 @@
 				<h2 id="lbl_resultats" class="visually-hidden">Résultats</h2>
 				
 				<div role="tablist" aria-labelledby="lbl_resultats" class="manual">
-					<button id="btn_instagram" type="button" role="tab" aria-selected="false" aria-controls="panel_instagram"><h3>Instagram</h3></button>
+					<button id="btn_instagram" type="button" role="tab" aria-selected="true" aria-controls="panel_instagram"><h3>Instagram</h3></button>
 					<button id="btn_facebook" type="button" role="tab" aria-selected="false" aria-controls="panel_facebook"><h3>Facebook</h3></button>
 					<button id="btn_facebook" type="button" role="tab" aria-selected="false" aria-controls="panel_youtube"><h3>Youtube</h3></button>
 					<button id="btn_pixelfed" type="button" role="tab" aria-selected="false" aria-controls="panel_pixelfed"><h3>Pixelfed</h3></button>
 					<button id="btn_bluesky" type="button" role="tab" aria-selected="false" aria-controls="panel_bluesky"><h3>BlueSky</h3></button>
 					<button id="btn_mastodon" type="button" role="tab" aria-selected="false" aria-controls="panel_mastodon"><h3>Mastodon</h3></button>
 					<button id="btn_threads" type="button" role="tab" aria-selected="false" aria-controls="panel_threads"><h3>Threads</h3></button>
-					<button id="btn_twitter" type="button" role="tab" aria-selected="true" aria-controls="panel_twitter"><h3>Twitter</h3></button>
+					<button id="btn_twitter" type="button" role="tab" aria-selected="false" aria-controls="panel_twitter"><h3>Twitter</h3></button>
 					<!--<button id="btn_linkedin" type="button" role="tab" aria-selected="false" aria-controls="panel_linkedin"><h3>Linkedin</h3></button>-->
 				</div>
 				<div id="panel_twitter" role="tabpanel" aria-labelledby="btn_twitter" class="">
@@ -368,10 +372,10 @@
 			</div>
 						
 		</main>
-		<footer>
+		<footer role="contentinfo">
 			<a href="https://itsbudding.fr" target="_blank">
-				développé par&nbsp;<span lang="en">It's Budding</span><br/>
-				<img alt="" src="./logo_itsbudding-black.svg">
+				développé par&nbsp;<span lang="en">It's Budding</span> - <?php echo date("Y"); ?><br/>
+				<img alt="" src="./img/logo_itsbudding-black.svg">
 			</a>
 		</footer>
 		<script src="./script.js"></script>

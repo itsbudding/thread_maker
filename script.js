@@ -1,15 +1,27 @@
 ﻿// LISTE DES HASHTAGS THEMATIQUES
 const arrayHashtags = [];
-	arrayHashtags["a11y"] = "accessibilite handicap a11y itsbudding";
-	arrayHashtags["lego"] = "lego legofrance legoideas frenchafol legoaddict legocollection afolcommunity legofan bricknetwork legoafol legostagram instalego LegoLife LegoBricks afolclub brickfan legobuilder legocollector legolover legocommunity";
+	arrayHashtags["none"] = "";
+	arrayHashtags["a11y"] = "accessibilite handicap a11y accessibilitenumerique digitalaccessibility a11y inclusivedesign conceptionaccessible webaccessible accessforall uxaccessible handicapetnumerique designinclusif";
+	arrayHashtags["lego"] = "lego legofrance afol legogram instalego legofan legoafol legophotography legomoc legominifigures brickcentral toyphotography legolife legoideas legobuild bricks legocommunity legobuilder legocreation legolove legobricks";
 	arrayHashtags["itsbudding"] = "itsbudding";
-	arrayHashtags["scc"] = "sport culture itsbudding";
-	
+	arrayHashtags["scc"] = "sport culture sportetculture culturedusport sportaucinema filmsdesport litteraturesportive sportetsociete heritagesportif artetsport espritsportif documentairesportif";
+
+// LISTE DES LOGOS
+const arrayLogos = [];
+	arrayLogos["none"] = "default.png";
+	arrayLogos["a11y"] = "default.png";
+	arrayLogos["lego"] = "logo_itsbricking.png";
+	arrayLogos["itsbudding"] = "logo_itsbudding.png";
+	arrayLogos["scc"] = "logo_scc.png";
+
 // par défaut, affichage des mots clés "itsbudding"
 // document.getElementById("thread_hashtags").value = arrayHashtags["itsbudding"];
 
 function fill_hashtags(element){
 	document.getElementById("thread_hashtags").value = arrayHashtags[element.value];
+}
+function fill_img(element){
+	document.getElementById("thread_theme_img").src = "./img/" + arrayLogos[element.value];
 }
 
 function selectTheme(element, valeur){

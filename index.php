@@ -340,10 +340,9 @@ Auth::exigerConnexion();
 	<body>
 		<header role="banner">
 			<h1>Thread Maker</h1>
-			<button id="bouton_theme" type="button" onclick="basculerTheme()">🌙 Mode sombre</button>
 		</header>
-		<?php $pageCourante = "index"; include __DIR__."/lib/nav.php"; ?>
 		<main role="main">
+			<?php $pageCourante = "index"; include __DIR__."/lib/nav.php"; ?>
 			<div id="formulaire">
 				<h2 id="form_lbl" class="visually-hidden">Formulaire de saisie</h2>
 				<form action="./" method="post" enctype="multipart/form-data">

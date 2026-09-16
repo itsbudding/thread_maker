@@ -405,8 +405,15 @@ function afficherApercuImages(champFichier){
     var legende = document.createElement("span");
     legende.textContent = "Image " + (index + 1);
 
+    var champAlt = document.createElement("input");
+    champAlt.type = "text";
+    champAlt.name = "images_alt[]";
+    champAlt.placeholder = "Description (optionnel)";
+    champAlt.setAttribute("aria-label", "Description alternative de l'image " + (index + 1));
+
     li.appendChild(img);
     li.appendChild(legende);
+    li.appendChild(champAlt);
     conteneur.appendChild(li);
   });
 }

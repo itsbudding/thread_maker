@@ -44,6 +44,19 @@ function copier(id){
 	document.getElementById("btn_" + id).classList.add("checked");
 }
 
+// Affiche un message discret juste après le bouton concerné, plutôt qu'une alerte bloquante.
+function afficherNotificationPublication(bouton, message, succes){
+	let notification = bouton.nextElementSibling;
+	if(!notification || !notification.classList.contains("notification_publication")){
+		notification = document.createElement("span");
+		notification.className = "notification_publication";
+		bouton.insertAdjacentElement("afterend", notification);
+	}
+	notification.textContent = message;
+	notification.classList.toggle("erreur", !succes);
+	notification.classList.toggle("succes", succes);
+}
+
 async function envoyerPublication(idTexte, corps){
 	const bouton = document.getElementById("btn_publier_" + idTexte);
 	const libelleInitial = bouton.innerText;
@@ -61,13 +74,13 @@ async function envoyerPublication(idTexte, corps){
 		else{
 			bouton.innerText = libelleInitial;
 			bouton.disabled = false;
-			alert("Échec de la publication : " + (resultat.erreur || "erreur inconnue."));
+			afficherNotificationPublication(bouton, resultat.erreur || "Erreur inconnue.", false);
 		}
 	}
 	catch(erreur){
 		bouton.innerText = libelleInitial;
 		bouton.disabled = false;
-		alert("Erreur réseau lors de la publication : " + erreur.message);
+		afficherNotificationPublication(bouton, "Erreur réseau : " + erreur.message, false);
 	}
 }
 
@@ -266,7 +279,48 @@ window.addEventListener('load', function () {
   for (var i = 0; i < tablists.length; i++) {
     new TabsManual(tablists[i]);
   }
-  
+
   controle_length();
-  
+
+  var champImages = document.getElementById("thread_images");
+  if(champImages){
+    champImages.addEventListener("change", function(){ afficherApercuImages(champImages); });
+  }
+
+  var formulaireGeneration = document.querySelector("#formulaire form");
+  if(formulaireGeneration){
+    formulaireGeneration.addEventListener("submit", function(){
+      var boutonSoumettre = formulaireGeneration.querySelector('button[type="submit"]');
+      if(boutonSoumettre){
+        boutonSoumettre.disabled = true;
+        boutonSoumettre.innerText = "Génération…";
+      }
+    });
+  }
+
 });
+
+// Génère des miniatures pour les images choisies, numérotées dans leur ordre d'upload
+// (l'ordre qui déterminera ensuite quelle image va sur quel segment / le carrousel Instagram).
+function afficherApercuImages(champFichier){
+  var conteneur = document.getElementById("apercu_images");
+  if(!conteneur) return;
+
+  conteneur.innerHTML = "";
+
+  Array.from(champFichier.files).forEach(function(fichier, index){
+    var li = document.createElement("li");
+
+    var img = document.createElement("img");
+    img.src = URL.createObjectURL(fichier);
+    img.alt = "";
+    img.onload = function(){ URL.revokeObjectURL(img.src); };
+
+    var legende = document.createElement("span");
+    legende.textContent = "Image " + (index + 1);
+
+    li.appendChild(img);
+    li.appendChild(legende);
+    conteneur.appendChild(li);
+  });
+}

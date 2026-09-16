@@ -18,10 +18,19 @@
 	/* Focus : toujours le plus contrasté possible, quel que soit le fond */
 	--color-focus: var(--color-text);
 
-	/* Statuts (vérifiés AA sur fond blanc) */
+	/* Statuts (vérifiés AA sur fond blanc). Ces valeurs restent fixes quel que soit le thème :
+	   elles ne servent que de fond de badge/bouton avec du texte blanc dessus (contraste propre
+	   à la paire, indépendant du thème de la page). Pour du texte de statut directement sur le
+	   fond de la page (ex. l'indicateur de longueur), voir les variantes *-text ci-dessous,
+	   qui elles sont redéfinies en mode sombre. */
 	--color-success: #1A7F37;
 	--color-warning: #B45309;
 	--color-danger: #B91C1C;
+
+	--color-accent-text: var(--color-accent);
+	--color-success-text: var(--color-success);
+	--color-warning-text: var(--color-warning);
+	--color-danger-text: var(--color-danger);
 
 	/* Échelle d'espacement */
 	--space-1: 4px;
@@ -43,6 +52,10 @@ html{
 	color: var(--color-text);
 
 	font-family: "Segoe UI", Arial, sans-serif;
+
+	/* Laisse le navigateur adapter nativement les contrôles de formulaire et la barre de
+	   défilement au thème (utile même avant que nos propres styles ne s'appliquent). */
+	color-scheme: light dark;
 }
 body{
 	font-size: .9rem;
@@ -129,6 +142,30 @@ input:focus-visible, textarea:focus-visible, select:focus-visible{
 	resize: vertical;
 }
 
+.apercu_images{
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2);
+	list-style: none;
+	padding: 0;
+	margin: var(--space-2) 0 0 0;
+}
+.apercu_images li{
+	width: 84px;
+	text-align: center;
+	font-size: .7rem;
+	color: var(--color-text-muted);
+}
+.apercu_images img{
+	width: 84px;
+	height: 84px;
+	object-fit: cover;
+	border-radius: var(--radius-sm);
+	border: 1px solid var(--color-border);
+	display: block;
+	margin-bottom: var(--space-1);
+}
+
 button[type="submit"]{
 	text-align:center;
 	font-family:inherit;
@@ -196,6 +233,17 @@ button[type="submit"]:focus-visible{
 	color: var(--color-white);
 }
 
+.notification_publication{
+	font-size: .75rem;
+	align-self: center;
+}
+.notification_publication.erreur{
+	color: var(--color-danger-text);
+}
+.notification_publication.succes{
+	color: var(--color-success-text);
+}
+
 .informations{
 	font-size:0.75rem;
 	font-style:italic;
@@ -247,7 +295,7 @@ hr{
 
 [role="tab"][aria-selected="true"] {
   border-bottom: 3px solid var(--color-accent);
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 
 [role="tabpanel"] {
@@ -269,13 +317,13 @@ hr{
 }
 
 .ctrl_length.ok span.length {
-  color: var(--color-success);
+  color: var(--color-success-text);
 }
 .ctrl_length.ko span.length {
-  color: var(--color-danger);
+  color: var(--color-danger-text);
 }
 .ctrl_length.warning span.length {
-  color: var(--color-warning);
+  color: var(--color-warning-text);
 }
 .ctrl_length.alert {
   color: var(--color-white);
@@ -356,5 +404,24 @@ footer img {
 	[role="tab"]{
 		flex: 0 0 auto;
 		padding: var(--space-3) var(--space-4);
+	}
+}
+
+@media (prefers-color-scheme: dark){
+	:root{
+		--color-bg: #121212;
+		--color-surface: #1E1E1E;
+		--color-surface-strong: #2A2A2A;
+		--color-border: #767676;
+		--color-text: #F0F0F0;
+		--color-text-muted: #A8A8A8;
+
+		/* Variantes de texte plus claires, lisibles sur fond sombre (les couleurs de base
+		   --color-accent/success/warning/danger restent inchangées : elles servent de fond
+		   de badge/bouton avec du texte blanc, un contraste indépendant du thème). */
+		--color-accent-text: #93C5FD;
+		--color-success-text: #4ADE80;
+		--color-warning-text: #FBBF24;
+		--color-danger-text: #F87171;
 	}
 }

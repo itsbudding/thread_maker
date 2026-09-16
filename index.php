@@ -364,6 +364,7 @@ Auth::exigerConnexion();
 						Une image par segment sur les réseaux "fil" (Mastodon/BlueSky/Pixelfed) ; toutes les images ensemble en carrousel sur Instagram.
 					</p>
 					<input aria-labelledby="thread_images_lbl" type="file" id="thread_images" name="images[]" accept="image/png, image/jpeg" multiple />
+					<ul id="apercu_images" class="apercu_images" aria-live="polite"></ul>
 					<hr/>
 					<p id="creer_fil_informations" class="informations">
 						Les résultats s'afficheront sous le bouton, une fois le formulaire soumis.

@@ -71,7 +71,7 @@ async function envoyerPublication(idTexte, corps){
 	}
 }
 
-async function publier(idTexte, compteId, imageNom){
+async function publier(idTexte, compteId, imageNom, imageAlt){
 	const texte = document.getElementById(idTexte).innerText;
 	const corps = new URLSearchParams();
 	corps.set("jeton_csrf", JETON_CSRF_PUBLICATION);
@@ -79,6 +79,9 @@ async function publier(idTexte, compteId, imageNom){
 	corps.set("texte", texte);
 	if(imageNom){
 		corps.set("image_nom", imageNom);
+	}
+	if(imageAlt){
+		corps.set("image_alt", imageAlt);
 	}
 	await envoyerPublication(idTexte, corps);
 }

@@ -52,9 +52,22 @@ class Database{
 				statut TEXT NOT NULL CHECK(statut IN ('succes', 'erreur')),
 				message_erreur TEXT,
 				id_externe TEXT,
+				cle_idempotence TEXT,
 				cree_le TEXT NOT NULL DEFAULT (datetime('now'))
 			)
 		");
+		self::ajouterColonneSiAbsente($pdo, "publications", "cle_idempotence", "TEXT");
+	}
+
+	// Migration additive simple : ajoute une colonne à une table existante si elle n'y est pas déjà
+	// (permet de faire évoluer le schéma sans perdre les données d'une base déjà en place).
+	private static function ajouterColonneSiAbsente(PDO $pdo, string $table, string $colonne, string $type): void{
+		foreach($pdo->query("PRAGMA table_info($table)")->fetchAll() as $colonneExistante){
+			if($colonneExistante["name"] === $colonne){
+				return;
+			}
+		}
+		$pdo->exec("ALTER TABLE $table ADD COLUMN $colonne $type");
 	}
 
 }

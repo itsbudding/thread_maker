@@ -3,12 +3,7 @@
 require_once __DIR__."/lib/bootstrap.php";
 require_once __DIR__."/lib/Database.php";
 require_once __DIR__."/lib/Crypto.php";
-require_once __DIR__."/lib/Publishers/PublishResult.php";
-require_once __DIR__."/lib/Publishers/PublisherInterface.php";
-require_once __DIR__."/lib/Publishers/MastodonPublisher.php";
-require_once __DIR__."/lib/Publishers/PixelfedPublisher.php";
-require_once __DIR__."/lib/Publishers/BlueskyPublisher.php";
-require_once __DIR__."/lib/Publishers/InstagramPublisher.php";
+require_once __DIR__."/lib/PublicationService.php";
 
 Auth::exigerConnexion();
 header("Content-Type: application/json; charset=UTF-8");
@@ -50,59 +45,23 @@ catch(Throwable $e){
 	repondre(500, ["succes" => false, "erreur" => "Impossible de déchiffrer le jeton de ce compte."]);
 }
 
-$simulation = getenv("APP_MODE_SIMULATION") === "1";
-$dossierUploads = __DIR__."/uploads";
-
 if($compte["reseau"] === "instagram"){
 	// Instagram publie toujours toutes les images uploadées ensemble, en un seul carrousel.
-	$nomsImages = array_map(
-		fn($nom) => basename((string)$nom),
-		is_array($_POST["images"] ?? null) ? $_POST["images"] : []
-	);
-	$nomsImages = array_values(array_filter(
-		$nomsImages,
-		fn($nom) => $nom !== "" && is_file($dossierUploads."/".$nom)
-	));
-
+	$nomsImages = is_array($_POST["images"] ?? null) ? $_POST["images"] : [];
 	if(count($nomsImages) === 0){
 		repondre(400, ["succes" => false, "erreur" => "Au moins une image est nécessaire pour publier sur Instagram."]);
 	}
-
-	$hoteBase = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off" ? "https://" : "http://").$_SERVER["HTTP_HOST"];
-	$urlsImages = array_map(fn($nom) => $hoteBase."/uploads/".$nom, $nomsImages);
-
-	$resultat = (new InstagramPublisher($simulation))->publierCarrousel($compte, $texte, $urlsImages);
+	$textesAlternatifs = [];
 }
 else{
-	// Réseaux "fil" : une image optionnelle, uploadée directement (pas besoin d'URL publique).
-	$nomImage = basename((string)($_POST["image_nom"] ?? ""));
-	$cheminImage = ($nomImage !== "" && is_file($dossierUploads."/".$nomImage)) ? $dossierUploads."/".$nomImage : null;
-
-	$publisher = match($compte["reseau"]){
-		"mastodon" => new MastodonPublisher($simulation),
-		"pixelfed" => new PixelfedPublisher($simulation),
-		"bluesky" => new BlueskyPublisher($simulation),
-		default => null,
-	};
-
-	if($publisher === null){
-		repondre(400, ["succes" => false, "erreur" => "Réseau non pris en charge par cet endpoint."]);
-	}
-
-	$resultat = $publisher->publier($compte, $texte, $cheminImage);
+	// Réseaux "fil" : une image optionnelle (avec sa description alternative éventuelle).
+	$nomImage = (string)($_POST["image_nom"] ?? "");
+	$nomsImages = $nomImage !== "" ? [$nomImage] : [];
+	$texteAlternatif = (string)($_POST["image_alt"] ?? "");
+	$textesAlternatifs = $texteAlternatif !== "" ? [$texteAlternatif] : [];
 }
 
-$journal = $pdo->prepare("
-	INSERT INTO publications (compte_id, reseau, statut, message_erreur, id_externe)
-	VALUES (:compte_id, :reseau, :statut, :message_erreur, :id_externe)
-");
-$journal->execute([
-	":compte_id" => $compteId,
-	":reseau" => $compte["reseau"],
-	":statut" => $resultat->succes ? "succes" : "erreur",
-	":message_erreur" => $resultat->messageErreur,
-	":id_externe" => $resultat->idExterne,
-]);
+$resultat = PublicationService::publier($compte, $texte, $nomsImages, $textesAlternatifs);
 
 repondre(200, [
 	"succes" => $resultat->succes,

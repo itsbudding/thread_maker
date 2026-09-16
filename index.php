@@ -240,7 +240,16 @@ Auth::exigerConnexion();
 		if($compte === null) return "";
 		$argImage = $imageNom !== null ? "'".h($imageNom)."'" : "null";
 		$argAlt = ($imageAlt !== null && trim($imageAlt) !== "") ? "'".h($imageAlt)."'" : "null";
-		return " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick=\"publier('$idTexte', ".(int)$compte["id"].", $argImage, $argAlt)\">Publier</button>";
+		$html = " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick=\"publier('$idTexte', ".(int)$compte["id"].", $argImage, $argAlt)\">Publier</button>";
+		$html .= controlesProgrammation($idTexte, $compte["id"], $argImage, $argAlt);
+		return $html;
+	}
+
+	// Contrôle "Programmer" : un input datetime-local + un bouton, à côté de chaque bouton "Publier".
+	// $argImage/$argAlt sont déjà formatés en littéraux JS ('...' ou null), pour être réutilisés tels quels.
+	function controlesProgrammation(string $idTexte, int $compteId, string $argImage = "null", string $argAlt = "null"): string{
+		return " <input type='datetime-local' id='date_$idTexte' class=\"date_programmation\" aria-label='Date de programmation' />".
+			" <button id='btn_programmer_$idTexte' class=\"copy programmer\" onclick=\"programmer('$idTexte', $compteId, $argImage, $argAlt)\">Programmer</button>";
 	}
 
 	// Affiche les panneaux "fil" (plusieurs posts numérotés) : Twitter, BlueSky, Mastodon, Threads.
@@ -280,6 +289,8 @@ Auth::exigerConnexion();
 			if(count($images) > 0){
 				$imagesJson = htmlspecialchars(json_encode(array_values($images)), ENT_QUOTES, "UTF-8");
 				echo " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick='publierInstagram(&quot;$idTexte&quot;, ".(int)$compte["id"].", $imagesJson)'>Publier (carrousel)</button>";
+				echo " <input type='datetime-local' id='date_$idTexte' class=\"date_programmation\" aria-label='Date de programmation' />";
+				echo " <button id='btn_programmer_$idTexte' class=\"copy programmer\" onclick='programmerInstagram(&quot;$idTexte&quot;, ".(int)$compte["id"].", $imagesJson)'>Programmer (carrousel)</button>";
 			}
 			else{
 				echo " <span class=\"informations\">Ajoutez au moins une image ci-dessus pour publier sur Instagram.</span>";
@@ -324,7 +335,7 @@ Auth::exigerConnexion();
 		<header role="banner">
 			<h1>Thread Maker</h1>
 		</header>
-		<p id="lien_comptes"><a href="./comptes.php">Gérer les comptes</a> · <a href="./historique.php">Historique</a> · <a href="./logout.php">Se déconnecter</a></p>
+		<p id="lien_comptes"><a href="./comptes.php">Gérer les comptes</a> · <a href="./historique.php">Historique</a> · <a href="./planifications.php">Publications programmées</a> · <a href="./logout.php">Se déconnecter</a></p>
 		<main role="main">
 			<div id="formulaire">
 				<h2 id="form_lbl" class="visually-hidden">Formulaire de saisie</h2>

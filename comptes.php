@@ -145,7 +145,7 @@ $jetonCsrf = Auth::jetonCsrf();
 			<h1>Thread Maker</h1>
 		</header>
 		<main role="main">
-			<p><a href="./index.php">← Retour au générateur</a> · <a href="./historique.php">Historique des publications</a> · <a href="./logout.php">Se déconnecter</a></p>
+			<p><a href="./index.php">← Retour au générateur</a> · <a href="./historique.php">Historique des publications</a> · <a href="./planifications.php">Publications programmées</a> · <a href="./logout.php">Se déconnecter</a></p>
 
 			<h2>Familles de comptes</h2>
 

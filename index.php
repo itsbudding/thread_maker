@@ -130,6 +130,7 @@ Auth::exigerConnexion();
 	class tmForm{
 
 		public $theme = "none";
+		public $familleId = 0;
 		public $prefixe = "";
 		public $suffixe = "🧵⬇️";
 		public $hashtags = "";
@@ -155,6 +156,7 @@ Auth::exigerConnexion();
 			}
 
 			if(isset($values["thread_theme"])) $this->theme = $values["thread_theme"];
+			if(isset($values["famille_id"])) $this->familleId = (int)$values["famille_id"];
 			if(isset($values["thread_habillage_prefixe"])) $this->prefixe = $values["thread_habillage_prefixe"];
 			if(isset($values["thread_habillage_suffixe"])) $this->suffixe = $values["thread_habillage_suffixe"];
 			if(isset($values["thread_hashtags"])) $this->hashtags = stringifyHashtags($values["thread_hashtags"]);
@@ -199,34 +201,57 @@ Auth::exigerConnexion();
 		return $stringHashtags;
 	}
 
+	// Bouton "Publier" affiché uniquement si un compte est configuré pour ce réseau/cette famille (PR "réseaux simples").
+	function boutonPublier(?array $compte, string $idTexte): string{
+		if($compte === null) return "";
+		return " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick=\"publier('$idTexte', ".(int)$compte["id"].")\">Publier</button>";
+	}
+
 	// Affiche les panneaux "fil" (plusieurs posts numérotés) : Twitter, BlueSky, Mastodon, Threads.
-	function afficherPanneauFil($threadRS, string $prefixeId){
+	function afficherPanneauFil($threadRS, string $prefixeId, ?array $compte = null){
 		if(!isset($threadRS)) return;
 		foreach($threadRS->posts as $i => $post){
 			$post = h($post);
 			$post = str_replace("¤", "<br/>", $post);
 			$post = str_replace(PAGINATION, ($i+1)."/".$threadRS->total, $post);
-			echo "<div class='segment'><p id='{$prefixeId}_$i'>$post</p><button id='btn_{$prefixeId}_$i' onclick=\"copier('{$prefixeId}_$i')\" class=\"copy\">Copier</button></div>";
+			$idTexte = "{$prefixeId}_$i";
+			echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>".boutonPublier($compte, $idTexte)."</div>";
 		}
 	}
 
 	// Affiche les panneaux "post unique" avec indicateur de longueur : Instagram, Facebook, Pixelfed, Youtube.
-	function afficherPanneauPubli($publiRS, string $prefixeId){
+	function afficherPanneauPubli($publiRS, string $prefixeId, ?array $compte = null){
 		if(!isset($publiRS)) return;
 		echo "<div class=\"ctrl_length\" data-valuemax=\"".$publiRS->maxlength."\" data-valuenow=\"".$publiRS->length."\">";
 		echo "<span class='length'>".$publiRS->length."</span> / ".$publiRS->maxlength." caractères</div>";
 		$post = h($publiRS->content);
 		$post = str_replace("¤", "<br/>", $post);
-		echo "<div class='segment'><p id='{$prefixeId}_0'>$post</p><button id='btn_{$prefixeId}_0' onclick=\"copier('{$prefixeId}_0')\" class=\"copy\">Copier</button></div>";
+		$idTexte = "{$prefixeId}_0";
+		echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>".boutonPublier($compte, $idTexte)."</div>";
 	}
 
 	// echo "<pre>"; print_r($_POST); echo "</pre>";
 	
 	$valeurs = new tmForm($_POST);
-	
+
 	// echo "<pre>POST :<br/>"; print_r($valeurs); echo "</pre>";
 	// echo "<hr/>";
 	// echo "<pre>$valeurs->content</pre>";
+
+	// Familles de comptes disponibles pour la publication (PR "réseaux simples" : mastodon/pixelfed/bluesky).
+	$pdo = Database::connexion();
+	$familles = $pdo->query("SELECT * FROM familles ORDER BY nom")->fetchAll();
+
+	$comptesParReseau = [];
+	if($valeurs->familleId > 0){
+		$requeteComptes = $pdo->prepare("SELECT * FROM comptes WHERE famille_id = :famille_id");
+		$requeteComptes->execute([":famille_id" => $valeurs->familleId]);
+		foreach($requeteComptes->fetchAll() as $compte){
+			$comptesParReseau[$compte["reseau"]] = $compte;
+		}
+	}
+
+	$jetonCsrfPublication = Auth::jetonCsrf();
 
 ?>
 	<body>
@@ -249,6 +274,15 @@ Auth::exigerConnexion();
 							<option value="a11y">Cap Accessibilité</option>
 						</select>
 					</div>
+					<hr/>
+					<h3 id="famille_id_lbl">Famille de comptes (pour la publication)</h3>
+					<select aria-labelledby="famille_id_lbl" id="famille_id" name="famille_id">
+						<option value="0">-----</option>
+						<?php foreach($familles as $famille): ?>
+							<option value="<?php echo (int)$famille["id"]; ?>" <?php echo $famille["id"] == $valeurs->familleId ? "selected" : ""; ?>><?php echo h($famille["nom"]); ?></option>
+						<?php endforeach; ?>
+					</select>
+					<p class="informations">Seuls Mastodon, Pixelfed et Bluesky peuvent être publiés directement pour l'instant.</p>
 					<hr/>
 					<h3>Habillage</h3>
 					<h4 id="thread_habillage_prefixe_lbl">Préfixe</h4>
@@ -290,10 +324,10 @@ Auth::exigerConnexion();
 					<?php afficherPanneauFil($valeurs->twitter, "tweet"); ?>
 				</div>
 				<div id="panel_bluesky" role="tabpanel" aria-labelledby="btn_bluesky" class="is-hidden">
-					<?php afficherPanneauFil($valeurs->bluesky, "bluesky"); ?>
+					<?php afficherPanneauFil($valeurs->bluesky, "bluesky", $comptesParReseau["bluesky"] ?? null); ?>
 				</div>
 				<div id="panel_mastodon" role="tabpanel" aria-labelledby="btn_mastodon" class="is-hidden">
-					<?php afficherPanneauFil($valeurs->mastodon, "masto"); ?>
+					<?php afficherPanneauFil($valeurs->mastodon, "masto", $comptesParReseau["mastodon"] ?? null); ?>
 				</div>
 				<div id="panel_threads" role="tabpanel" aria-labelledby="btn_threads" class="is-hidden">
 					<?php afficherPanneauFil($valeurs->threads, "threads"); ?>
@@ -305,7 +339,7 @@ Auth::exigerConnexion();
 					<?php afficherPanneauPubli($valeurs->facebook, "facebook"); ?>
 				</div>
 				<div id="panel_pixelfed" role="tabpanel" aria-labelledby="btn_pixelfed" class="is-hidden">
-					<?php afficherPanneauPubli($valeurs->pixelfed, "pixelfed"); ?>
+					<?php afficherPanneauPubli($valeurs->pixelfed, "pixelfed", $comptesParReseau["pixelfed"] ?? null); ?>
 				</div>
 				<div id="panel_youtube" role="tabpanel" aria-labelledby="btn_youtube" class="is-hidden">
 					<?php afficherPanneauPubli($valeurs->youtube, "youtube"); ?>
@@ -320,9 +354,10 @@ Auth::exigerConnexion();
 				<img alt="" src="./img/logo_itsbudding-black.svg">
 			</a>
 		</footer>
-		<script src="./script.js"></script>
 		<script>
-			// selectTheme(document.getElementById('thread_theme'),'<?php echo $valeurs->theme ?>');		
+			const JETON_CSRF_PUBLICATION = "<?php echo h($jetonCsrfPublication); ?>";
+			// selectTheme(document.getElementById('thread_theme'),'<?php echo $valeurs->theme ?>');
 		</script>
+		<script src="./script.js"></script>
 	</body>
 </html>

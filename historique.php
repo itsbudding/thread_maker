@@ -34,6 +34,7 @@ $publications = $pdo->query("
 		</header>
 		<main role="main">
 			<?php $pageCourante = "historique"; include __DIR__."/lib/nav.php"; ?>
+			<button id="bouton_densite" type="button" onclick="basculerDensite()">↕️ Compact</button>
 
 			<h2>Historique des publications</h2>
 			<p class="informations">Les 200 dernières tentatives de publication (succès et échecs), les plus récentes en premier.</p>

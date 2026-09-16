@@ -243,7 +243,7 @@ Auth::exigerConnexion();
 		}
 		$argImage = $imageNom !== null ? "'".h($imageNom)."'" : "null";
 		$argAlt = ($imageAlt !== null && trim($imageAlt) !== "") ? "'".h($imageAlt)."'" : "null";
-		$html = " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick=\"publier('$idTexte', ".(int)$compte["id"].", $argImage, $argAlt)\">Publier</button>";
+		$html = " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick=\"publier('$idTexte', ".(int)$compte["id"].", $argImage, $argAlt)\">📤 Publier</button>";
 		$html .= controlesProgrammation($idTexte, $compte["id"], $argImage, $argAlt);
 		return $html;
 	}
@@ -252,7 +252,7 @@ Auth::exigerConnexion();
 	// $argImage/$argAlt sont déjà formatés en littéraux JS ('...' ou null), pour être réutilisés tels quels.
 	function controlesProgrammation(string $idTexte, int $compteId, string $argImage = "null", string $argAlt = "null"): string{
 		return " <input type='datetime-local' id='date_$idTexte' class=\"date_programmation\" aria-label='Date de programmation' />".
-			" <button id='btn_programmer_$idTexte' class=\"copy programmer\" onclick=\"programmer('$idTexte', $compteId, $argImage, $argAlt)\">Programmer</button>";
+			" <button id='btn_programmer_$idTexte' class=\"copy programmer\" onclick=\"programmer('$idTexte', $compteId, $argImage, $argAlt)\">🕒 Programmer</button>";
 	}
 
 	// Affiche les panneaux "fil" (plusieurs posts numérotés) : Twitter, BlueSky, Mastodon, Threads.
@@ -291,9 +291,9 @@ Auth::exigerConnexion();
 		if($compte !== null){
 			if(count($images) > 0){
 				$imagesJson = htmlspecialchars(json_encode(array_values($images)), ENT_QUOTES, "UTF-8");
-				echo " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick='publierInstagram(&quot;$idTexte&quot;, ".(int)$compte["id"].", $imagesJson)'>Publier (carrousel)</button>";
+				echo " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick='publierInstagram(&quot;$idTexte&quot;, ".(int)$compte["id"].", $imagesJson)'>📤 Publier (carrousel)</button>";
 				echo " <input type='datetime-local' id='date_$idTexte' class=\"date_programmation\" aria-label='Date de programmation' />";
-				echo " <button id='btn_programmer_$idTexte' class=\"copy programmer\" onclick='programmerInstagram(&quot;$idTexte&quot;, ".(int)$compte["id"].", $imagesJson)'>Programmer (carrousel)</button>";
+				echo " <button id='btn_programmer_$idTexte' class=\"copy programmer\" onclick='programmerInstagram(&quot;$idTexte&quot;, ".(int)$compte["id"].", $imagesJson)'>🕒 Programmer (carrousel)</button>";
 			}
 			else{
 				echo " <span class=\"informations\">Ajoutez au moins une image ci-dessus pour publier sur Instagram.</span>";
@@ -347,56 +347,65 @@ Auth::exigerConnexion();
 			<div id="formulaire">
 				<h2 id="form_lbl" class="visually-hidden">Formulaire de saisie</h2>
 				<form action="./" method="post" enctype="multipart/form-data">
-					<h3 id="thread_theme_lbl">Identité</h3>
-					<div id="identite_row">
-						<img id="thread_theme_img" src="./img/default.png" alt="" />
-						<select aria-labelledby="thread_theme_lbl" id="thread_theme" name="thread_theme" onchange="fill_hashtags(this); fill_img(this);">
-							<option value="none">-----</option>
-							<option value="lego">It's Bricking</option>
-							<option value="itsbudding">It's Budding</option>
-							<option value="scc">Sporting Culture Club</option>
-							<option value="a11y">Cap Accessibilité</option>
-						</select>
+					<div class="section_formulaire">
+						<h3 id="thread_theme_lbl">Identité</h3>
+						<div id="identite_row">
+							<img id="thread_theme_img" src="./img/default.png" alt="" />
+							<select aria-labelledby="thread_theme_lbl" id="thread_theme" name="thread_theme" onchange="fill_hashtags(this); fill_img(this);">
+								<option value="none">-----</option>
+								<option value="lego">It's Bricking</option>
+								<option value="itsbudding">It's Budding</option>
+								<option value="scc">Sporting Culture Club</option>
+								<option value="a11y">Cap Accessibilité</option>
+							</select>
+						</div>
 					</div>
-					<hr/>
-					<h3 id="famille_id_lbl">Famille de comptes (pour la publication)</h3>
-					<select aria-labelledby="famille_id_lbl" id="famille_id" name="famille_id">
-						<option value="0">-----</option>
-						<?php foreach($familles as $famille): ?>
-							<option value="<?php echo (int)$famille["id"]; ?>" <?php echo $famille["id"] == $valeurs->familleId ? "selected" : ""; ?>><?php echo h($famille["nom"]); ?></option>
-						<?php endforeach; ?>
-					</select>
-					<p class="informations">Seuls Mastodon, Pixelfed et Bluesky peuvent être publiés directement pour l'instant.</p>
-					<hr/>
-					<h3>Habillage</h3>
-					<h4 id="thread_habillage_prefixe_lbl">Préfixe</h4>
-					<input aria-labelledby="thread_habillage_prefixe_lbl" type="text" id="thread_habillage_prefixe" name="thread_habillage_prefixe" value="<?php echo h($valeurs->prefixe) ?>" />
-					<h4 id="thread_habillage_suffixe_lbl">Suffixe</h4>
-					<p id="suffixe_informations" class="informations">
-						La pagination sera ajouté automatiquement.
-					</p>
-					<input aria-labelledby="thread_habillage_suffixe_lbl" aria-describedby="suffixe_informations" type="text" id="thread_habillage_suffixe" name="thread_habillage_suffixe" value="<?php echo h($valeurs->suffixe) ?>" />
-					<hr/>
-					<h3 id="thread_hashtags_lbl">Hashtags</h3>
-					<input aria-labelledby="thread_hashtags_lbl" type="text" id="thread_hashtags" name="thread_hashtags" value="<?php echo h(unstringifyHashtags($valeurs->hashtags)); ?>" />
-					<hr/>
-					<h3 id="thread_content_lbl">Contenu</h3>
-					<textarea aria-labelledby="thread_content_lbl" id="thread_content" name="thread_content"><?php echo h($valeurs->content) ?></textarea>
-					<p id="compteur_direct" class="informations" aria-live="polite"></p>
-					<p class="informations">
-						Ce compteur est approximatif (caractères bruts) ; le détail par réseau (habillage, hashtags, pagination) reste calculé après soumission.
-					</p>
-					<hr/>
-					<h3 id="thread_images_lbl">Images</h3>
-					<p class="informations">
-						Une image par segment sur les réseaux "fil" (Mastodon/BlueSky/Pixelfed) ; toutes les images ensemble en carrousel sur Instagram.
-					</p>
-					<input aria-labelledby="thread_images_lbl" type="file" id="thread_images" name="images[]" accept="image/png, image/jpeg" multiple />
-					<p class="informations">
-						Une description par image (optionnelle) peut être saisie sous sa miniature ci-dessous ; non prise en charge par l'API Instagram, seulement Mastodon/Pixelfed/BlueSky.
-					</p>
-					<ul id="apercu_images" class="apercu_images" aria-live="polite"></ul>
-					<hr/>
+
+					<div class="section_formulaire">
+						<h3 id="famille_id_lbl">Famille de comptes (pour la publication)</h3>
+						<select aria-labelledby="famille_id_lbl" id="famille_id" name="famille_id">
+							<option value="0">-----</option>
+							<?php foreach($familles as $famille): ?>
+								<option value="<?php echo (int)$famille["id"]; ?>" <?php echo $famille["id"] == $valeurs->familleId ? "selected" : ""; ?>><?php echo h($famille["nom"]); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<p class="informations">Seuls Mastodon, Pixelfed et Bluesky peuvent être publiés directement pour l'instant.</p>
+					</div>
+
+					<div class="section_formulaire">
+						<h3>Habillage</h3>
+						<h4 id="thread_habillage_prefixe_lbl">Préfixe</h4>
+						<input aria-labelledby="thread_habillage_prefixe_lbl" type="text" id="thread_habillage_prefixe" name="thread_habillage_prefixe" value="<?php echo h($valeurs->prefixe) ?>" />
+						<h4 id="thread_habillage_suffixe_lbl">Suffixe</h4>
+						<p id="suffixe_informations" class="informations">
+							La pagination sera ajouté automatiquement.
+						</p>
+						<input aria-labelledby="thread_habillage_suffixe_lbl" aria-describedby="suffixe_informations" type="text" id="thread_habillage_suffixe" name="thread_habillage_suffixe" value="<?php echo h($valeurs->suffixe) ?>" />
+						<h4 id="thread_hashtags_lbl">Hashtags</h4>
+						<input aria-labelledby="thread_hashtags_lbl" type="text" id="thread_hashtags" name="thread_hashtags" value="<?php echo h(unstringifyHashtags($valeurs->hashtags)); ?>" />
+					</div>
+
+					<div class="section_formulaire">
+						<h3 id="thread_content_lbl">Contenu</h3>
+						<textarea aria-labelledby="thread_content_lbl" id="thread_content" name="thread_content"><?php echo h($valeurs->content) ?></textarea>
+						<p id="compteur_direct" class="informations" aria-live="polite"></p>
+						<p class="informations">
+							Ce compteur est approximatif (caractères bruts) ; le détail par réseau (habillage, hashtags, pagination) reste calculé après soumission.
+						</p>
+					</div>
+
+					<div class="section_formulaire">
+						<h3 id="thread_images_lbl">Images</h3>
+						<p class="informations">
+							Une image par segment sur les réseaux "fil" (Mastodon/BlueSky/Pixelfed) ; toutes les images ensemble en carrousel sur Instagram.
+						</p>
+						<input aria-labelledby="thread_images_lbl" type="file" id="thread_images" name="images[]" accept="image/png, image/jpeg" multiple />
+						<p class="informations">
+							Une description par image (optionnelle) peut être saisie sous sa miniature ci-dessous ; non prise en charge par l'API Instagram, seulement Mastodon/Pixelfed/BlueSky.
+						</p>
+						<ul id="apercu_images" class="apercu_images" aria-live="polite"></ul>
+					</div>
+
 					<p id="creer_fil_informations" class="informations">
 						Les résultats s'afficheront sous le bouton, une fois le formulaire soumis.
 					</p>
@@ -409,14 +418,14 @@ Auth::exigerConnexion();
 				<h2 id="lbl_resultats" class="visually-hidden">Résultats</h2>
 				
 				<div role="tablist" aria-labelledby="lbl_resultats" class="manual">
-					<button id="btn_instagram" type="button" role="tab" aria-selected="true" aria-controls="panel_instagram"><h3>Instagram</h3></button>
-					<button id="btn_facebook" type="button" role="tab" aria-selected="false" aria-controls="panel_facebook"><h3>Facebook</h3></button>
-					<button id="btn_youtube" type="button" role="tab" aria-selected="false" aria-controls="panel_youtube"><h3>Youtube</h3></button>
-					<button id="btn_pixelfed" type="button" role="tab" aria-selected="false" aria-controls="panel_pixelfed"><h3>Pixelfed</h3></button>
-					<button id="btn_bluesky" type="button" role="tab" aria-selected="false" aria-controls="panel_bluesky"><h3>BlueSky</h3></button>
-					<button id="btn_mastodon" type="button" role="tab" aria-selected="false" aria-controls="panel_mastodon"><h3>Mastodon</h3></button>
-					<button id="btn_threads" type="button" role="tab" aria-selected="false" aria-controls="panel_threads"><h3>Threads</h3></button>
-					<button id="btn_twitter" type="button" role="tab" aria-selected="false" aria-controls="panel_twitter"><h3>Twitter</h3></button>
+					<button id="btn_instagram" type="button" role="tab" aria-selected="true" aria-controls="panel_instagram"><h3><span aria-hidden="true">📷</span> Instagram</h3></button>
+					<button id="btn_facebook" type="button" role="tab" aria-selected="false" aria-controls="panel_facebook"><h3><span aria-hidden="true">📘</span> Facebook</h3></button>
+					<button id="btn_youtube" type="button" role="tab" aria-selected="false" aria-controls="panel_youtube"><h3><span aria-hidden="true">▶️</span> Youtube</h3></button>
+					<button id="btn_pixelfed" type="button" role="tab" aria-selected="false" aria-controls="panel_pixelfed"><h3><span aria-hidden="true">🖼️</span> Pixelfed</h3></button>
+					<button id="btn_bluesky" type="button" role="tab" aria-selected="false" aria-controls="panel_bluesky"><h3><span aria-hidden="true">🦋</span> BlueSky</h3></button>
+					<button id="btn_mastodon" type="button" role="tab" aria-selected="false" aria-controls="panel_mastodon"><h3><span aria-hidden="true">🐘</span> Mastodon</h3></button>
+					<button id="btn_threads" type="button" role="tab" aria-selected="false" aria-controls="panel_threads"><h3><span aria-hidden="true">🧵</span> Threads</h3></button>
+					<button id="btn_twitter" type="button" role="tab" aria-selected="false" aria-controls="panel_twitter"><h3><span aria-hidden="true">🐦</span> Twitter</h3></button>
 				</div>
 				<div id="panel_twitter" role="tabpanel" aria-labelledby="btn_twitter" class="">
 					<?php afficherPanneauFil($valeurs->twitter, "tweet"); ?>

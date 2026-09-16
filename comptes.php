@@ -148,6 +148,7 @@ $jetonCsrf = Auth::jetonCsrf();
 		</header>
 		<main role="main">
 			<?php $pageCourante = "comptes"; include __DIR__."/lib/nav.php"; ?>
+			<button id="bouton_densite" type="button" onclick="basculerDensite()">↕️ Compact</button>
 
 			<h2>Familles de comptes</h2>
 

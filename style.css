@@ -109,6 +109,19 @@ h4{
 	gap: var(--space-1);
 }
 
+.section_formulaire{
+	background-color: var(--color-surface);
+	border: 1px solid var(--color-surface-strong);
+	border-radius: var(--radius-md);
+	padding: var(--space-4);
+	margin-bottom: var(--space-4);
+}
+.section_formulaire h3:first-child,
+.section_formulaire h4:first-child{
+	margin-top: 0;
+	padding-top: 0;
+}
+
 form *{
 	width:100%;
 }
@@ -255,6 +268,22 @@ button[type="submit"]:focus-visible{
 	color: var(--color-white);
 }
 
+/* "Publier" (action immédiate et irréversible) et "Programmer" (différée, annulable depuis
+   planifications.php) partagent le style de base de .copy mais restent visuellement distincts
+   pour ne pas déclencher la mauvaise action par habitude. */
+#resultats button.publier{
+	border-color: var(--color-accent);
+	color: var(--color-accent-text);
+}
+#resultats button.publier:hover{
+	background-color: var(--color-accent);
+	border-color: var(--color-accent);
+	color: var(--color-accent-contrast);
+}
+#resultats button.programmer{
+	border-style: dashed;
+}
+
 #bouton_theme{
 	font-family: inherit;
 	font-size: .8rem;
@@ -336,6 +365,9 @@ hr{
 [role="tab"] h3{
 	padding:0;
 }
+[role="tab"] h3 span[aria-hidden]{
+	margin-right: var(--space-1);
+}
 [role="tab"]:hover{
 	cursor:pointer;
 	background-color: var(--color-surface);
@@ -406,6 +438,34 @@ hr{
 	font-weight: 700;
 	font-size: 1rem;
 	padding: var(--space-2) 0;
+}
+
+:root[data-densite="compacte"] .tableau_donnees th,
+:root[data-densite="compacte"] .tableau_donnees td{
+	padding: 2px var(--space-2);
+}
+
+#bouton_densite{
+	font-family: inherit;
+	font-size: .8rem;
+	font-weight: 700;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	background-color: var(--color-surface-strong);
+	color: var(--color-text);
+	width: auto;
+	padding: var(--space-1) var(--space-3);
+	cursor: pointer;
+	margin-bottom: var(--space-3);
+	transition: background-color var(--transition-fast);
+}
+#bouton_densite:hover{
+	background-color: var(--color-border);
+	color: var(--color-white);
+}
+#bouton_densite:focus-visible{
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
 }
 
 .badge_statut{

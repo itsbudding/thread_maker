@@ -59,6 +59,18 @@ class Database{
 		self::ajouterColonneSiAbsente($pdo, "publications", "cle_idempotence", "TEXT");
 
 		$pdo->exec("
+			CREATE TABLE IF NOT EXISTS applications_oauth (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				instance_url TEXT NOT NULL,
+				reseau TEXT NOT NULL,
+				client_id TEXT NOT NULL,
+				client_secret_chiffre TEXT NOT NULL,
+				cree_le TEXT NOT NULL DEFAULT (datetime('now')),
+				UNIQUE(instance_url, reseau)
+			)
+		");
+
+		$pdo->exec("
 			CREATE TABLE IF NOT EXISTS publications_planifiees (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				compte_id INTEGER NOT NULL REFERENCES comptes(id) ON DELETE CASCADE,

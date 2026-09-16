@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__."/Database.php";
+require_once __DIR__."/UrlPublique.php";
 require_once __DIR__."/Publishers/PublishResult.php";
 require_once __DIR__."/Publishers/PublisherInterface.php";
 require_once __DIR__."/Publishers/MastodonPublisher.php";
@@ -12,7 +13,7 @@ require_once __DIR__."/Publishers/InstagramPublisher.php";
 // applique la protection anti double-publication, appelle le bon client, et journalise le
 // résultat dans `publications`. Utilisé par publier.php (immédiat) et par le cron de
 // publication programmée — donc jamais de dépendance à une requête HTTP en cours ($_SERVER
-// peut être absent en CLI, voir urlPubliqueParDefaut()).
+// peut être absent en CLI, voir UrlPublique::actuelle()).
 class PublicationService{
 
 	// $nomsImages : noms de fichiers dans /uploads (jamais de chemin/URL), dans l'ordre d'upload.
@@ -61,7 +62,7 @@ class PublicationService{
 			return new PublishResult(false, null, "Au moins une image est nécessaire pour publier sur Instagram.");
 		}
 
-		$base = rtrim($urlPubliqueBase ?? self::urlPubliqueParDefaut(), "/");
+		$base = rtrim($urlPubliqueBase ?? UrlPublique::actuelle(), "/");
 		$urlsImages = array_map(fn($nom) => $base."/uploads/".$nom, $nomsImages);
 
 		return (new InstagramPublisher($simulation))->publierCarrousel($compte, $texte, $urlsImages);
@@ -109,21 +110,6 @@ class PublicationService{
 			":id_externe" => $resultat->idExterne,
 			":cle_idempotence" => $cleIdempotence,
 		]);
-	}
-
-	// En dehors d'une requête HTTP (cron), $_SERVER["HTTP_HOST"] n'existe pas : APP_PUBLIC_URL
-	// dans .env doit alors fournir l'URL publique du site (nécessaire pour Instagram, qui va
-	// chercher lui-même les images sur cette URL).
-	private static function urlPubliqueParDefaut(): string{
-		$depuisEnv = getenv("APP_PUBLIC_URL");
-		if($depuisEnv !== false && $depuisEnv !== ""){
-			return $depuisEnv;
-		}
-		if(isset($_SERVER["HTTP_HOST"])){
-			$schema = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ? "https://" : "http://";
-			return $schema.$_SERVER["HTTP_HOST"];
-		}
-		throw new RuntimeException("Impossible de déterminer l'URL publique : définissez APP_PUBLIC_URL dans .env (nécessaire hors contexte web, ex. cron).");
 	}
 
 }

@@ -8,6 +8,7 @@ require_once __DIR__."/lib/Publishers/PublisherInterface.php";
 require_once __DIR__."/lib/Publishers/MastodonPublisher.php";
 require_once __DIR__."/lib/Publishers/PixelfedPublisher.php";
 require_once __DIR__."/lib/Publishers/BlueskyPublisher.php";
+require_once __DIR__."/lib/Publishers/InstagramPublisher.php";
 
 Auth::exigerConnexion();
 header("Content-Type: application/json; charset=UTF-8");
@@ -50,19 +51,46 @@ catch(Throwable $e){
 }
 
 $simulation = getenv("APP_MODE_SIMULATION") === "1";
+$dossierUploads = __DIR__."/uploads";
 
-$publisher = match($compte["reseau"]){
-	"mastodon" => new MastodonPublisher($simulation),
-	"pixelfed" => new PixelfedPublisher($simulation),
-	"bluesky" => new BlueskyPublisher($simulation),
-	default => null,
-};
+if($compte["reseau"] === "instagram"){
+	// Instagram publie toujours toutes les images uploadées ensemble, en un seul carrousel.
+	$nomsImages = array_map(
+		fn($nom) => basename((string)$nom),
+		is_array($_POST["images"] ?? null) ? $_POST["images"] : []
+	);
+	$nomsImages = array_values(array_filter(
+		$nomsImages,
+		fn($nom) => $nom !== "" && is_file($dossierUploads."/".$nom)
+	));
 
-if($publisher === null){
-	repondre(400, ["succes" => false, "erreur" => "Réseau non pris en charge par cet endpoint."]);
+	if(count($nomsImages) === 0){
+		repondre(400, ["succes" => false, "erreur" => "Au moins une image est nécessaire pour publier sur Instagram."]);
+	}
+
+	$hoteBase = (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off" ? "https://" : "http://").$_SERVER["HTTP_HOST"];
+	$urlsImages = array_map(fn($nom) => $hoteBase."/uploads/".$nom, $nomsImages);
+
+	$resultat = (new InstagramPublisher($simulation))->publierCarrousel($compte, $texte, $urlsImages);
 }
+else{
+	// Réseaux "fil" : une image optionnelle, uploadée directement (pas besoin d'URL publique).
+	$nomImage = basename((string)($_POST["image_nom"] ?? ""));
+	$cheminImage = ($nomImage !== "" && is_file($dossierUploads."/".$nomImage)) ? $dossierUploads."/".$nomImage : null;
 
-$resultat = $publisher->publier($compte, $texte, null);
+	$publisher = match($compte["reseau"]){
+		"mastodon" => new MastodonPublisher($simulation),
+		"pixelfed" => new PixelfedPublisher($simulation),
+		"bluesky" => new BlueskyPublisher($simulation),
+		default => null,
+	};
+
+	if($publisher === null){
+		repondre(400, ["succes" => false, "erreur" => "Réseau non pris en charge par cet endpoint."]);
+	}
+
+	$resultat = $publisher->publier($compte, $texte, $cheminImage);
+}
 
 $journal = $pdo->prepare("
 	INSERT INTO publications (compte_id, reseau, statut, message_erreur, id_externe)

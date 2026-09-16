@@ -44,20 +44,13 @@ function copier(id){
 	document.getElementById("btn_" + id).classList.add("checked");
 }
 
-async function publier(idTexte, compteId){
+async function envoyerPublication(idTexte, corps){
 	const bouton = document.getElementById("btn_publier_" + idTexte);
-	const texte = document.getElementById(idTexte).innerText;
-
 	const libelleInitial = bouton.innerText;
 	bouton.disabled = true;
 	bouton.innerText = "Publication…";
 
 	try{
-		const corps = new URLSearchParams();
-		corps.set("jeton_csrf", JETON_CSRF_PUBLICATION);
-		corps.set("compte_id", compteId);
-		corps.set("texte", texte);
-
 		const reponse = await fetch("./publier.php", { method: "POST", body: corps });
 		const resultat = await reponse.json();
 
@@ -76,6 +69,28 @@ async function publier(idTexte, compteId){
 		bouton.disabled = false;
 		alert("Erreur réseau lors de la publication : " + erreur.message);
 	}
+}
+
+async function publier(idTexte, compteId, imageNom){
+	const texte = document.getElementById(idTexte).innerText;
+	const corps = new URLSearchParams();
+	corps.set("jeton_csrf", JETON_CSRF_PUBLICATION);
+	corps.set("compte_id", compteId);
+	corps.set("texte", texte);
+	if(imageNom){
+		corps.set("image_nom", imageNom);
+	}
+	await envoyerPublication(idTexte, corps);
+}
+
+async function publierInstagram(idTexte, compteId, images){
+	const texte = document.getElementById(idTexte).innerText;
+	const corps = new URLSearchParams();
+	corps.set("jeton_csrf", JETON_CSRF_PUBLICATION);
+	corps.set("compte_id", compteId);
+	corps.set("texte", texte);
+	images.forEach((nom) => corps.append("images[]", nom));
+	await envoyerPublication(idTexte, corps);
 }
 
 function controle_length(element){

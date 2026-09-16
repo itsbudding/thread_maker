@@ -201,33 +201,89 @@ Auth::exigerConnexion();
 		return $stringHashtags;
 	}
 
-	// Bouton "Publier" affiché uniquement si un compte est configuré pour ce réseau/cette famille (PR "réseaux simples").
-	function boutonPublier(?array $compte, string $idTexte): string{
+	// Traite les images uploadées avec le formulaire : les enregistre dans /uploads avec un nom
+	// non-devinable, et renvoie la liste de leurs noms de fichiers (dans l'ordre d'upload).
+	function traiterImagesUploadees(array $fichiers): array{
+		$nomsFichiers = [];
+		if(!isset($fichiers["images"]["tmp_name"]) || !is_array($fichiers["images"]["tmp_name"])){
+			return $nomsFichiers;
+		}
+
+		$dossierUploads = __DIR__."/uploads";
+		if(!is_dir($dossierUploads)){
+			mkdir($dossierUploads, 0770, true);
+		}
+
+		$extensionsAutorisees = ["jpg", "jpeg", "png"];
+
+		foreach($fichiers["images"]["tmp_name"] as $i => $cheminTemporaire){
+			if(($fichiers["images"]["error"][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK){
+				continue;
+			}
+			$extension = strtolower(pathinfo($fichiers["images"]["name"][$i], PATHINFO_EXTENSION));
+			if(!in_array($extension, $extensionsAutorisees, true)){
+				continue;
+			}
+			$nomFichier = bin2hex(random_bytes(16)).".".$extension;
+			if(move_uploaded_file($cheminTemporaire, $dossierUploads."/".$nomFichier)){
+				$nomsFichiers[] = $nomFichier;
+			}
+		}
+
+		return $nomsFichiers;
+	}
+
+	// Bouton "Publier" affiché uniquement si un compte est configuré pour ce réseau/cette famille.
+	// $imageNom (optionnel) associe une image uploadée à ce segment précis (réseaux "fil").
+	function boutonPublier(?array $compte, string $idTexte, ?string $imageNom = null): string{
 		if($compte === null) return "";
-		return " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick=\"publier('$idTexte', ".(int)$compte["id"].")\">Publier</button>";
+		$argImage = $imageNom !== null ? "'".h($imageNom)."'" : "null";
+		return " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick=\"publier('$idTexte', ".(int)$compte["id"].", $argImage)\">Publier</button>";
 	}
 
 	// Affiche les panneaux "fil" (plusieurs posts numérotés) : Twitter, BlueSky, Mastodon, Threads.
-	function afficherPanneauFil($threadRS, string $prefixeId, ?array $compte = null){
+	// $images (optionnel) est réparti une image par segment : segment i ↔ images[i].
+	function afficherPanneauFil($threadRS, string $prefixeId, ?array $compte = null, array $images = []){
 		if(!isset($threadRS)) return;
 		foreach($threadRS->posts as $i => $post){
 			$post = h($post);
 			$post = str_replace("¤", "<br/>", $post);
 			$post = str_replace(PAGINATION, ($i+1)."/".$threadRS->total, $post);
 			$idTexte = "{$prefixeId}_$i";
-			echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>".boutonPublier($compte, $idTexte)."</div>";
+			echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>".boutonPublier($compte, $idTexte, $images[$i] ?? null)."</div>";
 		}
 	}
 
 	// Affiche les panneaux "post unique" avec indicateur de longueur : Instagram, Facebook, Pixelfed, Youtube.
-	function afficherPanneauPubli($publiRS, string $prefixeId, ?array $compte = null){
+	function afficherPanneauPubli($publiRS, string $prefixeId, ?array $compte = null, ?string $imageNom = null){
 		if(!isset($publiRS)) return;
 		echo "<div class=\"ctrl_length\" data-valuemax=\"".$publiRS->maxlength."\" data-valuenow=\"".$publiRS->length."\">";
 		echo "<span class='length'>".$publiRS->length."</span> / ".$publiRS->maxlength." caractères</div>";
 		$post = h($publiRS->content);
 		$post = str_replace("¤", "<br/>", $post);
 		$idTexte = "{$prefixeId}_0";
-		echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>".boutonPublier($compte, $idTexte)."</div>";
+		echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>".boutonPublier($compte, $idTexte, $imageNom)."</div>";
+	}
+
+	// Panneau Instagram : toutes les images uploadées sont publiées ensemble, en un seul carrousel.
+	function afficherPanneauInstagram($publiRS, ?array $compte, array $images){
+		if(!isset($publiRS)) return;
+		echo "<div class=\"ctrl_length\" data-valuemax=\"".$publiRS->maxlength."\" data-valuenow=\"".$publiRS->length."\">";
+		echo "<span class='length'>".$publiRS->length."</span> / ".$publiRS->maxlength." caractères</div>";
+		$post = h($publiRS->content);
+		$post = str_replace("¤", "<br/>", $post);
+		$idTexte = "insta_0";
+		echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>";
+		if($compte !== null){
+			if(count($images) > 0){
+				$imagesJson = htmlspecialchars(json_encode(array_values($images)), ENT_QUOTES, "UTF-8");
+				echo " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick='publierInstagram(&quot;$idTexte&quot;, ".(int)$compte["id"].", $imagesJson)'>Publier (carrousel)</button>";
+			}
+			else{
+				echo " <span class=\"informations\">Ajoutez au moins une image ci-dessus pour publier sur Instagram.</span>";
+			}
+		}
+		echo "</div>";
 	}
 
 	// echo "<pre>"; print_r($_POST); echo "</pre>";
@@ -253,6 +309,10 @@ Auth::exigerConnexion();
 
 	$jetonCsrfPublication = Auth::jetonCsrf();
 
+	// Images uploadées avec le formulaire (PR "Instagram") : une par segment sur les réseaux "fil",
+	// toutes ensemble en carrousel sur Instagram.
+	$imagesUploadees = isset($_FILES["images"]) ? traiterImagesUploadees($_FILES) : [];
+
 ?>
 	<body>
 		<header role="banner">
@@ -262,7 +322,7 @@ Auth::exigerConnexion();
 		<main role="main">
 			<div id="formulaire">
 				<h2 id="form_lbl" class="visually-hidden">Formulaire de saisie</h2>
-				<form action="./" method="post">
+				<form action="./" method="post" enctype="multipart/form-data">
 					<h3 id="thread_theme_lbl">Identité</h3>
 					<div id="identite_row">
 						<img id="thread_theme_img" src="./img/default.png" alt="" />
@@ -299,6 +359,12 @@ Auth::exigerConnexion();
 					<h3 id="thread_content_lbl">Contenu</h3>
 					<textarea aria-labelledby="thread_content_lbl" id="thread_content" name="thread_content"><?php echo h($valeurs->content) ?></textarea>
 					<hr/>
+					<h3 id="thread_images_lbl">Images</h3>
+					<p class="informations">
+						Une image par segment sur les réseaux "fil" (Mastodon/BlueSky/Pixelfed) ; toutes les images ensemble en carrousel sur Instagram.
+					</p>
+					<input aria-labelledby="thread_images_lbl" type="file" id="thread_images" name="images[]" accept="image/png, image/jpeg" multiple />
+					<hr/>
 					<p id="creer_fil_informations" class="informations">
 						Les résultats s'afficheront sous le bouton, une fois le formulaire soumis.
 					</p>
@@ -324,22 +390,22 @@ Auth::exigerConnexion();
 					<?php afficherPanneauFil($valeurs->twitter, "tweet"); ?>
 				</div>
 				<div id="panel_bluesky" role="tabpanel" aria-labelledby="btn_bluesky" class="is-hidden">
-					<?php afficherPanneauFil($valeurs->bluesky, "bluesky", $comptesParReseau["bluesky"] ?? null); ?>
+					<?php afficherPanneauFil($valeurs->bluesky, "bluesky", $comptesParReseau["bluesky"] ?? null, $imagesUploadees); ?>
 				</div>
 				<div id="panel_mastodon" role="tabpanel" aria-labelledby="btn_mastodon" class="is-hidden">
-					<?php afficherPanneauFil($valeurs->mastodon, "masto", $comptesParReseau["mastodon"] ?? null); ?>
+					<?php afficherPanneauFil($valeurs->mastodon, "masto", $comptesParReseau["mastodon"] ?? null, $imagesUploadees); ?>
 				</div>
 				<div id="panel_threads" role="tabpanel" aria-labelledby="btn_threads" class="is-hidden">
 					<?php afficherPanneauFil($valeurs->threads, "threads"); ?>
 				</div>
 				<div id="panel_instagram" role="tabpanel" aria-labelledby="btn_instagram" class="is-hidden">
-					<?php afficherPanneauPubli($valeurs->instagram, "insta"); ?>
+					<?php afficherPanneauInstagram($valeurs->instagram, $comptesParReseau["instagram"] ?? null, $imagesUploadees); ?>
 				</div>
 				<div id="panel_facebook" role="tabpanel" aria-labelledby="btn_facebook" class="is-hidden">
 					<?php afficherPanneauPubli($valeurs->facebook, "facebook"); ?>
 				</div>
 				<div id="panel_pixelfed" role="tabpanel" aria-labelledby="btn_pixelfed" class="is-hidden">
-					<?php afficherPanneauPubli($valeurs->pixelfed, "pixelfed", $comptesParReseau["pixelfed"] ?? null); ?>
+					<?php afficherPanneauPubli($valeurs->pixelfed, "pixelfed", $comptesParReseau["pixelfed"] ?? null, $imagesUploadees[0] ?? null); ?>
 				</div>
 				<div id="panel_youtube" role="tabpanel" aria-labelledby="btn_youtube" class="is-hidden">
 					<?php afficherPanneauPubli($valeurs->youtube, "youtube"); ?>

@@ -381,6 +381,7 @@ Auth::exigerConnexion();
 						Une image par segment sur les réseaux "fil" (Mastodon/BlueSky/Pixelfed) ; toutes les images ensemble en carrousel sur Instagram.
 					</p>
 					<input aria-labelledby="thread_images_lbl" type="file" id="thread_images" name="images[]" accept="image/png, image/jpeg" multiple />
+					<ul id="apercu_images" class="apercu_images" aria-live="polite"></ul>
 					<h4 id="thread_images_alt_lbl">Description des images (texte alternatif)</h4>
 					<p class="informations">
 						Une ligne par image, dans le même ordre que les fichiers choisis ci-dessus. Optionnel ; non pris en charge par l'API Instagram, seulement Mastodon/Pixelfed/BlueSky.

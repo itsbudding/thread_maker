@@ -3,14 +3,16 @@
 require_once __DIR__."/lib/bootstrap.php";
 require_once __DIR__."/lib/Database.php";
 require_once __DIR__."/lib/Crypto.php";
+require_once __DIR__."/lib/Comptes.php";
 
 Auth::exigerConnexion();
 
 const RESEAUX_DISPONIBLES = ["mastodon", "pixelfed", "bluesky", "instagram"];
+const RESEAUX_OAUTH_DISPONIBLES = ["mastodon", "pixelfed"];
 
 $pdo = Database::connexion();
 $erreur = "";
-$succes = "";
+$succes = ($_GET["oauth"] ?? "") === "succes" ? "Compte connecté avec succès." : "";
 
 function slugifier(string $nom): string{
 	$slug = strtolower(trim($nom));
@@ -61,17 +63,7 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 				$erreur = "Tous les champs (famille, réseau, identifiant, jeton) sont obligatoires.";
 			}
 			else{
-				$requete = $pdo->prepare("
-					INSERT INTO comptes (famille_id, reseau, identifiant, instance_url, jeton_chiffre)
-					VALUES (:famille_id, :reseau, :identifiant, :instance_url, :jeton_chiffre)
-				");
-				$requete->execute([
-					":famille_id" => $familleId,
-					":reseau" => $reseau,
-					":identifiant" => $identifiant,
-					":instance_url" => $instanceUrl !== "" ? $instanceUrl : null,
-					":jeton_chiffre" => Crypto::chiffrer($jeton),
-				]);
+				insererCompte($pdo, $familleId, $reseau, $identifiant, $instanceUrl !== "" ? $instanceUrl : null, $jeton);
 				$succes = "Compte ".$reseau." ajouté.";
 			}
 		}
@@ -211,7 +203,33 @@ $jetonCsrf = Auth::jetonCsrf();
 						</table>
 					<?php endif; ?>
 
-					<h4>Ajouter un compte à cette famille</h4>
+					<h4>Se connecter via Mastodon/Pixelfed</h4>
+					<p class="informations">Enregistre automatiquement une application sur l'instance donnée (aucun compte développeur nécessaire) et redirige vers sa page d'autorisation ; le compte est ajouté ici une fois la connexion approuvée.</p>
+					<form action="./oauth_demarrer.php" method="post">
+						<input type="hidden" name="jeton_csrf" value="<?php echo h($jetonCsrf); ?>" />
+						<input type="hidden" name="famille_id" value="<?php echo (int)$famille["id"]; ?>" />
+
+						<label>Réseau
+							<select name="reseau" required>
+								<?php foreach(RESEAUX_OAUTH_DISPONIBLES as $reseau): ?>
+									<option value="<?php echo h($reseau); ?>"><?php echo h($reseau); ?></option>
+								<?php endforeach; ?>
+							</select>
+						</label>
+						<label>URL d'instance
+							<input type="text" name="instance_url" placeholder="https://mastodon.social" required />
+						</label>
+						<button type="submit">Se connecter</button>
+					</form>
+
+					<p class="informations">
+						Bluesky : pas de connexion en un clic pour l'instant, mais vous pouvez
+						<a href="https://bsky.app/settings/app-passwords" target="_blank" rel="noopener noreferrer">créer un « app password »</a>
+						sur bsky.app puis le coller ci-dessous dans le champ jeton.<br>
+						Instagram : nécessite une App Meta (compte Business + App Review) déjà configurée par vous en dehors de cet outil ; collez le jeton d'accès obtenu dans le champ jeton ci-dessous.
+					</p>
+
+					<h4>Ajouter un compte à cette famille (jeton existant)</h4>
 					<form action="./comptes.php" method="post">
 						<input type="hidden" name="jeton_csrf" value="<?php echo h($jetonCsrf); ?>" />
 						<input type="hidden" name="action" value="ajouter_compte" />

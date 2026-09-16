@@ -7,7 +7,7 @@ class BlueskyPublisher implements PublisherInterface{
 
 	public function __construct(private bool $simulation = false){}
 
-	public function publier(array $compte, string $texte, ?string $cheminImage): PublishResult{
+	public function publier(array $compte, string $texte, ?string $cheminImage, ?string $texteAlternatif = null): PublishResult{
 		if($this->simulation){
 			return new PublishResult(true, "simulation-".bin2hex(random_bytes(4)));
 		}
@@ -25,7 +25,7 @@ class BlueskyPublisher implements PublisherInterface{
 			}
 			$embed = [
 				"\$type" => "app.bsky.embed.images",
-				"images" => [["image" => $blob, "alt" => ""]],
+				"images" => [["image" => $blob, "alt" => $texteAlternatif ?? ""]],
 			];
 		}
 

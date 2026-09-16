@@ -52,10 +52,6 @@ html{
 	color: var(--color-text);
 
 	font-family: "Segoe UI", Arial, sans-serif;
-
-	/* Laisse le navigateur adapter nativement les contrôles de formulaire et la barre de
-	   défilement au thème (utile même avant que nos propres styles ne s'appliquent). */
-	color-scheme: light dark;
 }
 body{
 	font-size: .9rem;
@@ -314,6 +310,20 @@ nav[aria-label="Navigation principale"] strong[aria-current="page"]{
 	text-decoration: underline;
 }
 
+.barre_navigation{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-1) var(--space-2);
+}
+.barre_navigation_bascules{
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	margin-left: auto;
+}
+
 .notification_publication{
 	font-size: .75rem;
 	align-self: center;
@@ -358,6 +368,7 @@ hr{
 [role="tab"]{
 	border:none;
 	background:none;
+	color: var(--color-text);
 	padding: var(--space-2) var(--space-3);
 	border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 	transition: background-color var(--transition-fast);
@@ -563,6 +574,8 @@ footer img {
 
 @media (prefers-color-scheme: dark){
 	:root{
+		color-scheme: dark;
+
 		--color-bg: #121212;
 		--color-surface: #1E1E1E;
 		--color-surface-strong: #2A2A2A;
@@ -585,6 +598,11 @@ footer img {
    ci-dessus : [data-theme] a une spécificité plus forte que le bloc @media et gagne donc
    toujours, qu'il s'agisse de forcer le sombre sur un système clair ou l'inverse. */
 :root[data-theme="sombre"]{
+	/* Force les contrôles natifs (barre de défilement, etc.) à suivre le choix manuel plutôt
+	   que la préférence OS — voir [role="tab"] et consorts qui, eux, ont maintenant un `color`
+	   explicite et n'en dépendent plus. */
+	color-scheme: dark;
+
 	--color-bg: #121212;
 	--color-surface: #1E1E1E;
 	--color-surface-strong: #2A2A2A;
@@ -598,6 +616,8 @@ footer img {
 }
 
 :root[data-theme="clair"]{
+	color-scheme: light;
+
 	--color-bg: #FFFFFF;
 	--color-surface: #F5F5F5;
 	--color-surface-strong: #EEEEEE;

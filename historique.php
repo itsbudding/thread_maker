@@ -30,11 +30,9 @@ $publications = $pdo->query("
 	<body>
 		<header role="banner">
 			<h1>Thread Maker</h1>
-			<button id="bouton_theme" type="button" onclick="basculerTheme()">🌙 Mode sombre</button>
 		</header>
 		<main role="main">
-			<?php $pageCourante = "historique"; include __DIR__."/lib/nav.php"; ?>
-			<button id="bouton_densite" type="button" onclick="basculerDensite()">↕️ Compact</button>
+			<?php $pageCourante = "historique"; $afficherBoutonDensite = true; include __DIR__."/lib/nav.php"; ?>
 
 			<h2>Historique des publications</h2>
 			<p class="informations">Les 200 dernières tentatives de publication (succès et échecs), les plus récentes en premier.</p>

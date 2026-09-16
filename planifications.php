@@ -53,11 +53,9 @@ $libellesStatut = [
 	<body>
 		<header role="banner">
 			<h1>Thread Maker</h1>
-			<button id="bouton_theme" type="button" onclick="basculerTheme()">🌙 Mode sombre</button>
 		</header>
 		<main role="main">
-			<?php $pageCourante = "planifications"; include __DIR__."/lib/nav.php"; ?>
-			<button id="bouton_densite" type="button" onclick="basculerDensite()">↕️ Compact</button>
+			<?php $pageCourante = "planifications"; $afficherBoutonDensite = true; include __DIR__."/lib/nav.php"; ?>
 
 			<h2>Publications programmées</h2>
 			<p class="informations">

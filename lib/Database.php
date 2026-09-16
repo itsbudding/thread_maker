@@ -57,6 +57,21 @@ class Database{
 			)
 		");
 		self::ajouterColonneSiAbsente($pdo, "publications", "cle_idempotence", "TEXT");
+
+		$pdo->exec("
+			CREATE TABLE IF NOT EXISTS publications_planifiees (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				compte_id INTEGER NOT NULL REFERENCES comptes(id) ON DELETE CASCADE,
+				reseau TEXT NOT NULL,
+				texte TEXT NOT NULL,
+				images TEXT,
+				images_alt TEXT,
+				date_prevue TEXT NOT NULL,
+				statut TEXT NOT NULL DEFAULT 'en_attente' CHECK(statut IN ('en_attente', 'publiee', 'erreur', 'annulee')),
+				message_erreur TEXT,
+				cree_le TEXT NOT NULL DEFAULT (datetime('now'))
+			)
+		");
 	}
 
 	// Migration additive simple : ajoute une colonne à une table existante si elle n'y est pas déjà

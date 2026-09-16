@@ -154,9 +154,26 @@ button[type="submit"]:focus-visible{
 /***************************************************** RESULTATS ********************/
 #resultats .segment{
 	display:flex;
+	flex-wrap: wrap;
 	align-items:flex-end;
 	gap: var(--space-2);
 	margin-bottom: var(--space-2);
+}
+
+#resultats input.date_programmation{
+	flex: 0 0 auto;
+	font-family: inherit;
+	font-size: .8rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	padding: var(--space-2) var(--space-3);
+	min-height: 36px;
+	background-color: var(--color-bg);
+	color: var(--color-text);
+}
+#resultats input.date_programmation:focus-visible{
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
 }
 
 #resultats .segment p{
@@ -321,6 +338,10 @@ hr{
 }
 .badge_statut.ko{
 	background-color: var(--color-danger);
+}
+.badge_statut.attente{
+	background-color: var(--color-surface-strong);
+	color: var(--color-text);
 }
 
 

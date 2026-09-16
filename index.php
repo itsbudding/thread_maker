@@ -332,9 +332,9 @@ Auth::exigerConnexion();
 	// toutes ensemble en carrousel sur Instagram.
 	$imagesUploadees = isset($_FILES["images"]) ? traiterImagesUploadees($_FILES) : [];
 
-	// Une ligne de description alternative par image uploadée, dans le même ordre que $imagesUploadees
-	// (les lignes vides sont conservées pour ne pas décaler l'alignement image ↔ description).
-	$imagesAltUploadees = array_map("trim", preg_split("/\r\n|\r|\n/", (string)($_POST["images_alt"] ?? "")));
+	// Une description alternative par image uploadée, dans le même ordre que $imagesUploadees
+	// (un champ par miniature, généré en JS — voir afficherApercuImages() dans script.js).
+	$imagesAltUploadees = is_array($_POST["images_alt"] ?? null) ? array_map("trim", $_POST["images_alt"]) : [];
 
 ?>
 	<body>
@@ -392,12 +392,10 @@ Auth::exigerConnexion();
 						Une image par segment sur les réseaux "fil" (Mastodon/BlueSky/Pixelfed) ; toutes les images ensemble en carrousel sur Instagram.
 					</p>
 					<input aria-labelledby="thread_images_lbl" type="file" id="thread_images" name="images[]" accept="image/png, image/jpeg" multiple />
-					<ul id="apercu_images" class="apercu_images" aria-live="polite"></ul>
-					<h4 id="thread_images_alt_lbl">Description des images (texte alternatif)</h4>
 					<p class="informations">
-						Une ligne par image, dans le même ordre que les fichiers choisis ci-dessus. Optionnel ; non pris en charge par l'API Instagram, seulement Mastodon/Pixelfed/BlueSky.
+						Une description par image (optionnelle) peut être saisie sous sa miniature ci-dessous ; non prise en charge par l'API Instagram, seulement Mastodon/Pixelfed/BlueSky.
 					</p>
-					<textarea aria-labelledby="thread_images_alt_lbl" id="thread_images_alt" name="images_alt" rows="3"><?php echo h($_POST["images_alt"] ?? "") ?></textarea>
+					<ul id="apercu_images" class="apercu_images" aria-live="polite"></ul>
 					<hr/>
 					<p id="creer_fil_informations" class="informations">
 						Les résultats s'afficheront sous le bouton, une fois le formulaire soumis.

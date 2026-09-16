@@ -1,3 +1,11 @@
+<?php
+
+require_once __DIR__."/lib/bootstrap.php";
+require_once __DIR__."/lib/Database.php";
+
+Auth::exigerConnexion();
+
+?>
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
 	<head>
@@ -191,11 +199,6 @@
 		return $stringHashtags;
 	}
 
-	// Échappement HTML systématique de toute donnée utilisateur avant affichage.
-	function h(?string $valeur){
-		return htmlspecialchars($valeur ?? "", ENT_QUOTES, "UTF-8");
-	}
-
 	// Affiche les panneaux "fil" (plusieurs posts numérotés) : Twitter, BlueSky, Mastodon, Threads.
 	function afficherPanneauFil($threadRS, string $prefixeId){
 		if(!isset($threadRS)) return;
@@ -230,6 +233,7 @@
 		<header role="banner">
 			<h1>Thread Maker</h1>
 		</header>
+		<p id="lien_comptes"><a href="./comptes.php">Gérer les comptes</a> · <a href="./logout.php">Se déconnecter</a></p>
 		<main role="main">
 			<div id="formulaire">
 				<h2 id="form_lbl" class="visually-hidden">Formulaire de saisie</h2>

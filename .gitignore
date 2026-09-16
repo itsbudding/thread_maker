@@ -1,0 +1,5 @@
+# Secrets et données locales — jamais commit
+.env
+/data/
+/uploads/*
+!/uploads/.gitkeep

@@ -84,7 +84,7 @@ async function envoyerPublication(idTexte, corps){
 	}
 }
 
-async function publier(idTexte, compteId, imageNom){
+async function publier(idTexte, compteId, imageNom, imageAlt){
 	const texte = document.getElementById(idTexte).innerText;
 	const corps = new URLSearchParams();
 	corps.set("jeton_csrf", JETON_CSRF_PUBLICATION);
@@ -92,6 +92,9 @@ async function publier(idTexte, compteId, imageNom){
 	corps.set("texte", texte);
 	if(imageNom){
 		corps.set("image_nom", imageNom);
+	}
+	if(imageAlt){
+		corps.set("image_alt", imageAlt);
 	}
 	await envoyerPublication(idTexte, corps);
 }
@@ -104,6 +107,75 @@ async function publierInstagram(idTexte, compteId, images){
 	corps.set("texte", texte);
 	images.forEach((nom) => corps.append("images[]", nom));
 	await envoyerPublication(idTexte, corps);
+}
+
+async function envoyerPlanification(idTexte, corps){
+	const bouton = document.getElementById("btn_programmer_" + idTexte);
+	const libelleInitial = bouton.innerText;
+	bouton.disabled = true;
+	bouton.innerText = "Programmation…";
+
+	try{
+		const reponse = await fetch("./planifier.php", { method: "POST", body: corps });
+		const resultat = await reponse.json();
+
+		if(resultat.succes){
+			bouton.innerText = "✓ Programmé !";
+			bouton.classList.add("checked");
+		}
+		else{
+			bouton.innerText = libelleInitial;
+			bouton.disabled = false;
+			alert("Échec de la programmation : " + (resultat.erreur || "erreur inconnue."));
+		}
+	}
+	catch(erreur){
+		bouton.innerText = libelleInitial;
+		bouton.disabled = false;
+		alert("Erreur réseau lors de la programmation : " + erreur.message);
+	}
+}
+
+function datePrevueDepuisChamp(idTexte){
+	const champ = document.getElementById("date_" + idTexte);
+	return champ ? champ.value : "";
+}
+
+async function programmer(idTexte, compteId, imageNom, imageAlt){
+	const datePrevue = datePrevueDepuisChamp(idTexte);
+	if(!datePrevue){
+		alert("Choisissez une date/heure avant de programmer.");
+		return;
+	}
+	const texte = document.getElementById(idTexte).innerText;
+	const corps = new URLSearchParams();
+	corps.set("jeton_csrf", JETON_CSRF_PUBLICATION);
+	corps.set("compte_id", compteId);
+	corps.set("texte", texte);
+	corps.set("date_prevue", datePrevue);
+	if(imageNom){
+		corps.set("image_nom", imageNom);
+	}
+	if(imageAlt){
+		corps.set("image_alt", imageAlt);
+	}
+	await envoyerPlanification(idTexte, corps);
+}
+
+async function programmerInstagram(idTexte, compteId, images){
+	const datePrevue = datePrevueDepuisChamp(idTexte);
+	if(!datePrevue){
+		alert("Choisissez une date/heure avant de programmer.");
+		return;
+	}
+	const texte = document.getElementById(idTexte).innerText;
+	const corps = new URLSearchParams();
+	corps.set("jeton_csrf", JETON_CSRF_PUBLICATION);
+	corps.set("compte_id", compteId);
+	corps.set("texte", texte);
+	corps.set("date_prevue", datePrevue);
+	images.forEach((nom) => corps.append("images[]", nom));
+	await envoyerPlanification(idTexte, corps);
 }
 
 function controle_length(element){

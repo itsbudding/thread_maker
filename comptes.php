@@ -81,6 +81,43 @@ if($_SERVER["REQUEST_METHOD"] === "POST"){
 			$requete->execute([":id" => $id]);
 			$succes = "Compte supprimé.";
 		}
+		elseif($action === "modifier_compte"){
+			$id = (int)($_POST["compte_id"] ?? 0);
+			$identifiant = trim($_POST["identifiant"] ?? "");
+			$instanceUrl = trim($_POST["instance_url"] ?? "");
+			$jeton = trim($_POST["jeton"] ?? "");
+
+			if($id <= 0 || $identifiant === ""){
+				$erreur = "L'identifiant est obligatoire.";
+			}
+			else{
+				if($jeton !== ""){
+					$requete = $pdo->prepare("
+						UPDATE comptes SET identifiant = :identifiant, instance_url = :instance_url, jeton_chiffre = :jeton_chiffre
+						WHERE id = :id
+					");
+					$requete->execute([
+						":identifiant" => $identifiant,
+						":instance_url" => $instanceUrl !== "" ? $instanceUrl : null,
+						":jeton_chiffre" => Crypto::chiffrer($jeton),
+						":id" => $id,
+					]);
+				}
+				else{
+					// Jeton laissé vide : on ne touche pas au jeton_chiffre existant.
+					$requete = $pdo->prepare("
+						UPDATE comptes SET identifiant = :identifiant, instance_url = :instance_url
+						WHERE id = :id
+					");
+					$requete->execute([
+						":identifiant" => $identifiant,
+						":instance_url" => $instanceUrl !== "" ? $instanceUrl : null,
+						":id" => $id,
+					]);
+				}
+				$succes = "Compte mis à jour.";
+			}
+		}
 	}
 }
 
@@ -108,7 +145,7 @@ $jetonCsrf = Auth::jetonCsrf();
 			<h1>Thread Maker</h1>
 		</header>
 		<main role="main">
-			<p><a href="./index.php">← Retour au générateur</a> · <a href="./logout.php">Se déconnecter</a></p>
+			<p><a href="./index.php">← Retour au générateur</a> · <a href="./historique.php">Historique des publications</a> · <a href="./planifications.php">Publications programmées</a> · <a href="./logout.php">Se déconnecter</a></p>
 
 			<h2>Familles de comptes</h2>
 
@@ -123,20 +160,55 @@ $jetonCsrf = Auth::jetonCsrf();
 				<div id="formulaire">
 					<h3><?php echo h($famille["nom"]); ?> <span class="informations">(<?php echo h($famille["slug"]); ?>)</span></h3>
 
-					<ul>
-						<?php foreach($comptesParFamille[$famille["id"]] ?? [] as $compte): ?>
-							<li>
-								<?php echo h($compte["reseau"]); ?> — <?php echo h($compte["identifiant"]); ?>
-								<?php if($compte["instance_url"]): ?> (<?php echo h($compte["instance_url"]); ?>)<?php endif; ?>
-								<form action="./comptes.php" method="post" style="display:inline">
-									<input type="hidden" name="jeton_csrf" value="<?php echo h($jetonCsrf); ?>" />
-									<input type="hidden" name="action" value="supprimer_compte" />
-									<input type="hidden" name="compte_id" value="<?php echo (int)$compte["id"]; ?>" />
-									<button type="submit" class="copy">Supprimer</button>
-								</form>
-							</li>
-						<?php endforeach; ?>
-					</ul>
+					<?php if(count($comptesParFamille[$famille["id"]] ?? []) === 0): ?>
+						<p class="informations">Aucun compte pour l'instant.</p>
+					<?php else: ?>
+						<table class="tableau_donnees">
+							<thead>
+								<tr>
+									<th scope="col">Réseau</th>
+									<th scope="col">Identifiant</th>
+									<th scope="col">Instance</th>
+									<th scope="col">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php foreach($comptesParFamille[$famille["id"]] ?? [] as $compte): ?>
+									<tr>
+										<td><?php echo h($compte["reseau"]); ?></td>
+										<td><?php echo h($compte["identifiant"]); ?></td>
+										<td><?php echo h($compte["instance_url"] ?? "—"); ?></td>
+										<td>
+											<details>
+												<summary>Modifier</summary>
+												<form action="./comptes.php" method="post">
+													<input type="hidden" name="jeton_csrf" value="<?php echo h($jetonCsrf); ?>" />
+													<input type="hidden" name="action" value="modifier_compte" />
+													<input type="hidden" name="compte_id" value="<?php echo (int)$compte["id"]; ?>" />
+													<label>Identifiant
+														<input type="text" name="identifiant" value="<?php echo h($compte["identifiant"]); ?>" required />
+													</label>
+													<label>URL d'instance
+														<input type="text" name="instance_url" value="<?php echo h($compte["instance_url"] ?? ""); ?>" />
+													</label>
+													<label>Nouveau jeton (laisser vide pour conserver l'actuel)
+														<input type="password" name="jeton" autocomplete="off" />
+													</label>
+													<button type="submit">Enregistrer</button>
+												</form>
+											</details>
+											<form action="./comptes.php" method="post">
+												<input type="hidden" name="jeton_csrf" value="<?php echo h($jetonCsrf); ?>" />
+												<input type="hidden" name="action" value="supprimer_compte" />
+												<input type="hidden" name="compte_id" value="<?php echo (int)$compte["id"]; ?>" />
+												<button type="submit" class="copy">Supprimer</button>
+											</form>
+										</td>
+									</tr>
+								<?php endforeach; ?>
+							</tbody>
+						</table>
+					<?php endif; ?>
 
 					<h4>Ajouter un compte à cette famille</h4>
 					<form action="./comptes.php" method="post">

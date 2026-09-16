@@ -5,7 +5,7 @@ class MastodonPublisher implements PublisherInterface{
 
 	public function __construct(private bool $simulation = false){}
 
-	public function publier(array $compte, string $texte, ?string $cheminImage): PublishResult{
+	public function publier(array $compte, string $texte, ?string $cheminImage, ?string $texteAlternatif = null): PublishResult{
 		if($this->simulation){
 			return new PublishResult(true, "simulation-".bin2hex(random_bytes(4)));
 		}
@@ -17,7 +17,7 @@ class MastodonPublisher implements PublisherInterface{
 
 		$mediaIds = [];
 		if($cheminImage !== null){
-			$idMedia = $this->uploaderMedia($instance, $compte["jeton"], $cheminImage);
+			$idMedia = $this->uploaderMedia($instance, $compte["jeton"], $cheminImage, $texteAlternatif);
 			if($idMedia === null){
 				return new PublishResult(false, null, "Échec de l'upload de l'image.");
 			}
@@ -39,10 +39,12 @@ class MastodonPublisher implements PublisherInterface{
 		return new PublishResult(true, isset($reponse["id"]) ? (string)$reponse["id"] : null);
 	}
 
-	private function uploaderMedia(string $instance, string $jeton, string $cheminImage): ?string{
-		$reponse = $this->appelHttp($instance."/api/v1/media", $jeton, [
-			"file" => new CURLFile($cheminImage),
-		]);
+	private function uploaderMedia(string $instance, string $jeton, string $cheminImage, ?string $texteAlternatif): ?string{
+		$champs = ["file" => new CURLFile($cheminImage)];
+		if($texteAlternatif !== null && trim($texteAlternatif) !== ""){
+			$champs["description"] = $texteAlternatif;
+		}
+		$reponse = $this->appelHttp($instance."/api/v1/media", $jeton, $champs);
 		return $reponse["id"] ?? null;
 	}
 

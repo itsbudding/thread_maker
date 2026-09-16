@@ -191,9 +191,26 @@ button[type="submit"]:focus-visible{
 /***************************************************** RESULTATS ********************/
 #resultats .segment{
 	display:flex;
+	flex-wrap: wrap;
 	align-items:flex-end;
 	gap: var(--space-2);
 	margin-bottom: var(--space-2);
+}
+
+#resultats input.date_programmation{
+	flex: 0 0 auto;
+	font-family: inherit;
+	font-size: .8rem;
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-sm);
+	padding: var(--space-2) var(--space-3);
+	min-height: 36px;
+	background-color: var(--color-bg);
+	color: var(--color-text);
+}
+#resultats input.date_programmation:focus-visible{
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
 }
 
 #resultats .segment p{
@@ -331,6 +348,48 @@ hr{
 }
 .ctrl_length.alert span.length {
   color: var(--color-white);
+}
+
+
+/***************************************************** TABLEAUX / STATUTS ********************/
+.tableau_donnees{
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: var(--space-4);
+}
+.tableau_donnees th, .tableau_donnees td{
+	text-align: left;
+	padding: var(--space-2) var(--space-3);
+	border-bottom: 1px solid var(--color-surface-strong);
+	vertical-align: top;
+}
+.tableau_donnees th{
+	font-weight: 700;
+}
+.tableau_donnees caption{
+	text-align: left;
+	font-weight: 700;
+	font-size: 1rem;
+	padding: var(--space-2) 0;
+}
+
+.badge_statut{
+	display: inline-block;
+	padding: 2px var(--space-2);
+	border-radius: var(--radius-sm);
+	font-size: .8rem;
+	font-weight: 700;
+	color: var(--color-white);
+}
+.badge_statut.ok{
+	background-color: var(--color-success);
+}
+.badge_statut.ko{
+	background-color: var(--color-danger);
+}
+.badge_statut.attente{
+	background-color: var(--color-surface-strong);
+	color: var(--color-text);
 }
 
 

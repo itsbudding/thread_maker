@@ -237,8 +237,10 @@ Auth::exigerConnexion();
 	// Bouton "Publier" affiché uniquement si un compte est configuré pour ce réseau/cette famille.
 	// $imageNom (optionnel) associe une image uploadée à ce segment précis (réseaux "fil"),
 	// $imageAlt sa description alternative (Mastodon/Pixelfed/Bluesky uniquement, voir plus bas).
-	function boutonPublier(?array $compte, string $idTexte, ?string $imageNom = null, ?string $imageAlt = null): string{
-		if($compte === null) return "";
+	function boutonPublier(?array $compte, string $idTexte, ?string $imageNom = null, ?string $imageAlt = null, bool $familleSelectionnee = false): string{
+		if($compte === null){
+			return $familleSelectionnee ? " <span class=\"informations\">Aucun compte configuré pour ce réseau sur cette famille.</span>" : "";
+		}
 		$argImage = $imageNom !== null ? "'".h($imageNom)."'" : "null";
 		$argAlt = ($imageAlt !== null && trim($imageAlt) !== "") ? "'".h($imageAlt)."'" : "null";
 		$html = " <button id='btn_publier_$idTexte' class=\"copy publier\" onclick=\"publier('$idTexte', ".(int)$compte["id"].", $argImage, $argAlt)\">Publier</button>";
@@ -255,30 +257,30 @@ Auth::exigerConnexion();
 
 	// Affiche les panneaux "fil" (plusieurs posts numérotés) : Twitter, BlueSky, Mastodon, Threads.
 	// $images / $imagesAlt (optionnels) sont répartis une entrée par segment : segment i ↔ [i].
-	function afficherPanneauFil($threadRS, string $prefixeId, ?array $compte = null, array $images = [], array $imagesAlt = []){
+	function afficherPanneauFil($threadRS, string $prefixeId, ?array $compte = null, array $images = [], array $imagesAlt = [], bool $familleSelectionnee = false){
 		if(!isset($threadRS)) return;
 		foreach($threadRS->posts as $i => $post){
 			$post = h($post);
 			$post = str_replace("¤", "<br/>", $post);
 			$post = str_replace(PAGINATION, ($i+1)."/".$threadRS->total, $post);
 			$idTexte = "{$prefixeId}_$i";
-			echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>".boutonPublier($compte, $idTexte, $images[$i] ?? null, $imagesAlt[$i] ?? null)."</div>";
+			echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>".boutonPublier($compte, $idTexte, $images[$i] ?? null, $imagesAlt[$i] ?? null, $familleSelectionnee)."</div>";
 		}
 	}
 
 	// Affiche les panneaux "post unique" avec indicateur de longueur : Instagram, Facebook, Pixelfed, Youtube.
-	function afficherPanneauPubli($publiRS, string $prefixeId, ?array $compte = null, ?string $imageNom = null, ?string $imageAlt = null){
+	function afficherPanneauPubli($publiRS, string $prefixeId, ?array $compte = null, ?string $imageNom = null, ?string $imageAlt = null, bool $familleSelectionnee = false){
 		if(!isset($publiRS)) return;
 		echo "<div class=\"ctrl_length\" data-valuemax=\"".$publiRS->maxlength."\" data-valuenow=\"".$publiRS->length."\">";
 		echo "<span class='length'>".$publiRS->length."</span> / ".$publiRS->maxlength." caractères</div>";
 		$post = h($publiRS->content);
 		$post = str_replace("¤", "<br/>", $post);
 		$idTexte = "{$prefixeId}_0";
-		echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>".boutonPublier($compte, $idTexte, $imageNom, $imageAlt)."</div>";
+		echo "<div class='segment'><p id='$idTexte'>$post</p><button id='btn_$idTexte' onclick=\"copier('$idTexte')\" class=\"copy\">Copier</button>".boutonPublier($compte, $idTexte, $imageNom, $imageAlt, $familleSelectionnee)."</div>";
 	}
 
 	// Panneau Instagram : toutes les images uploadées sont publiées ensemble, en un seul carrousel.
-	function afficherPanneauInstagram($publiRS, ?array $compte, array $images){
+	function afficherPanneauInstagram($publiRS, ?array $compte, array $images, bool $familleSelectionnee = false){
 		if(!isset($publiRS)) return;
 		echo "<div class=\"ctrl_length\" data-valuemax=\"".$publiRS->maxlength."\" data-valuenow=\"".$publiRS->length."\">";
 		echo "<span class='length'>".$publiRS->length."</span> / ".$publiRS->maxlength." caractères</div>";
@@ -296,6 +298,9 @@ Auth::exigerConnexion();
 			else{
 				echo " <span class=\"informations\">Ajoutez au moins une image ci-dessus pour publier sur Instagram.</span>";
 			}
+		}
+		elseif($familleSelectionnee){
+			echo " <span class=\"informations\">Aucun compte Instagram configuré pour cette famille.</span>";
 		}
 		echo "</div>";
 	}
@@ -337,7 +342,7 @@ Auth::exigerConnexion();
 			<h1>Thread Maker</h1>
 			<button id="bouton_theme" type="button" onclick="basculerTheme()">🌙 Mode sombre</button>
 		</header>
-		<p id="lien_comptes"><a href="./comptes.php">Gérer les comptes</a> · <a href="./historique.php">Historique</a> · <a href="./planifications.php">Publications programmées</a> · <a href="./logout.php">Se déconnecter</a></p>
+		<?php $pageCourante = "index"; include __DIR__."/lib/nav.php"; ?>
 		<main role="main">
 			<div id="formulaire">
 				<h2 id="form_lbl" class="visually-hidden">Formulaire de saisie</h2>
@@ -377,6 +382,10 @@ Auth::exigerConnexion();
 					<hr/>
 					<h3 id="thread_content_lbl">Contenu</h3>
 					<textarea aria-labelledby="thread_content_lbl" id="thread_content" name="thread_content"><?php echo h($valeurs->content) ?></textarea>
+					<p id="compteur_direct" class="informations" aria-live="polite"></p>
+					<p class="informations">
+						Ce compteur est approximatif (caractères bruts) ; le détail par réseau (habillage, hashtags, pagination) reste calculé après soumission.
+					</p>
 					<hr/>
 					<h3 id="thread_images_lbl">Images</h3>
 					<p class="informations">
@@ -415,22 +424,22 @@ Auth::exigerConnexion();
 					<?php afficherPanneauFil($valeurs->twitter, "tweet"); ?>
 				</div>
 				<div id="panel_bluesky" role="tabpanel" aria-labelledby="btn_bluesky" class="is-hidden">
-					<?php afficherPanneauFil($valeurs->bluesky, "bluesky", $comptesParReseau["bluesky"] ?? null, $imagesUploadees, $imagesAltUploadees); ?>
+					<?php afficherPanneauFil($valeurs->bluesky, "bluesky", $comptesParReseau["bluesky"] ?? null, $imagesUploadees, $imagesAltUploadees, $valeurs->familleId > 0); ?>
 				</div>
 				<div id="panel_mastodon" role="tabpanel" aria-labelledby="btn_mastodon" class="is-hidden">
-					<?php afficherPanneauFil($valeurs->mastodon, "masto", $comptesParReseau["mastodon"] ?? null, $imagesUploadees, $imagesAltUploadees); ?>
+					<?php afficherPanneauFil($valeurs->mastodon, "masto", $comptesParReseau["mastodon"] ?? null, $imagesUploadees, $imagesAltUploadees, $valeurs->familleId > 0); ?>
 				</div>
 				<div id="panel_threads" role="tabpanel" aria-labelledby="btn_threads" class="is-hidden">
 					<?php afficherPanneauFil($valeurs->threads, "threads"); ?>
 				</div>
 				<div id="panel_instagram" role="tabpanel" aria-labelledby="btn_instagram" class="is-hidden">
-					<?php afficherPanneauInstagram($valeurs->instagram, $comptesParReseau["instagram"] ?? null, $imagesUploadees); ?>
+					<?php afficherPanneauInstagram($valeurs->instagram, $comptesParReseau["instagram"] ?? null, $imagesUploadees, $valeurs->familleId > 0); ?>
 				</div>
 				<div id="panel_facebook" role="tabpanel" aria-labelledby="btn_facebook" class="is-hidden">
 					<?php afficherPanneauPubli($valeurs->facebook, "facebook"); ?>
 				</div>
 				<div id="panel_pixelfed" role="tabpanel" aria-labelledby="btn_pixelfed" class="is-hidden">
-					<?php afficherPanneauPubli($valeurs->pixelfed, "pixelfed", $comptesParReseau["pixelfed"] ?? null, $imagesUploadees[0] ?? null, $imagesAltUploadees[0] ?? null); ?>
+					<?php afficherPanneauPubli($valeurs->pixelfed, "pixelfed", $comptesParReseau["pixelfed"] ?? null, $imagesUploadees[0] ?? null, $imagesAltUploadees[0] ?? null, $valeurs->familleId > 0); ?>
 				</div>
 				<div id="panel_youtube" role="tabpanel" aria-labelledby="btn_youtube" class="is-hidden">
 					<?php afficherPanneauPubli($valeurs->youtube, "youtube"); ?>

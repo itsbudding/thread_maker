@@ -33,7 +33,7 @@ $publications = $pdo->query("
 			<button id="bouton_theme" type="button" onclick="basculerTheme()">🌙 Mode sombre</button>
 		</header>
 		<main role="main">
-			<p><a href="./index.php">← Retour au générateur</a> · <a href="./comptes.php">Gérer les comptes</a> · <a href="./planifications.php">Publications programmées</a> · <a href="./logout.php">Se déconnecter</a></p>
+			<?php $pageCourante = "historique"; include __DIR__."/lib/nav.php"; ?>
 
 			<h2>Historique des publications</h2>
 			<p class="informations">Les 200 dernières tentatives de publication (succès et échecs), les plus récentes en premier.</p>

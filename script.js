@@ -370,6 +370,20 @@ window.addEventListener('load', function () {
     });
   }
 
+  var champContenu = document.getElementById("thread_content");
+  if(champContenu){
+    var afficherCompteurDirect = function(){
+      var compteur = document.getElementById("compteur_direct");
+      if(!compteur) return;
+      // Array.from itère par point de code Unicode, plus proche du ressenti utilisateur
+      // que .length (qui compte les émojis composés deux fois) sans viser l'exactitude
+      // grapheme_strlen() de PHP, calculée après soumission.
+      compteur.textContent = Array.from(champContenu.value).length + " caractères (brut)";
+    };
+    champContenu.addEventListener("input", afficherCompteurDirect);
+    afficherCompteurDirect();
+  }
+
 });
 
 // Génère des miniatures pour les images choisies, numérotées dans leur ordre d'upload

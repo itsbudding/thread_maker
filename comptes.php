@@ -147,7 +147,7 @@ $jetonCsrf = Auth::jetonCsrf();
 			<button id="bouton_theme" type="button" onclick="basculerTheme()">🌙 Mode sombre</button>
 		</header>
 		<main role="main">
-			<p><a href="./index.php">← Retour au générateur</a> · <a href="./historique.php">Historique des publications</a> · <a href="./planifications.php">Publications programmées</a> · <a href="./logout.php">Se déconnecter</a></p>
+			<?php $pageCourante = "comptes"; include __DIR__."/lib/nav.php"; ?>
 
 			<h2>Familles de comptes</h2>
 
@@ -199,7 +199,7 @@ $jetonCsrf = Auth::jetonCsrf();
 													<button type="submit">Enregistrer</button>
 												</form>
 											</details>
-											<form action="./comptes.php" method="post">
+											<form action="./comptes.php" method="post" onsubmit="return confirm('Supprimer ce compte (<?php echo h($compte["reseau"]); ?> — <?php echo h($compte["identifiant"]); ?>) ?');">
 												<input type="hidden" name="jeton_csrf" value="<?php echo h($jetonCsrf); ?>" />
 												<input type="hidden" name="action" value="supprimer_compte" />
 												<input type="hidden" name="compte_id" value="<?php echo (int)$compte["id"]; ?>" />
@@ -237,7 +237,7 @@ $jetonCsrf = Auth::jetonCsrf();
 						<button type="submit">Ajouter le compte</button>
 					</form>
 
-					<form action="./comptes.php" method="post">
+					<form action="./comptes.php" method="post" onsubmit="return confirm('Supprimer la famille « <?php echo h($famille["nom"]); ?> » et tous ses comptes associés ?');">
 						<input type="hidden" name="jeton_csrf" value="<?php echo h($jetonCsrf); ?>" />
 						<input type="hidden" name="action" value="supprimer_famille" />
 						<input type="hidden" name="famille_id" value="<?php echo (int)$famille["id"]; ?>" />

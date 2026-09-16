@@ -65,19 +65,28 @@ function controle_length(element){
 		console.log("longueur : " + ctrl_length_div.dataset.valuenow);
 		console.log("max : " + ctrl_length_div.dataset.valuemax);
 		console.log(ctrl_length_div.childNodes);
-		
+
 		let now = ctrl_length_div.dataset.valuenow;
 		let max = ctrl_length_div.dataset.valuemax;
-		
+
 		let ecart = max - now;
-		
-		switch(true){
-			case (ecart > 100): ctrl_length_div.classList.add("ok"); break;
-			case (ecart < 100 && ecart > 50): ctrl_length_div.classList.add("warning"); break;
-			case (ecart < 0): ctrl_length_div.classList.add("alert"); break;
-			case (ecart < 50): ctrl_length_div.classList.add("ko"); break;
+
+		// on repart d'un état propre à chaque recalcul, sinon les classes s'accumulent
+		ctrl_length_div.classList.remove("ok", "warning", "ko", "alert");
+
+		if(ecart < 0){
+			ctrl_length_div.classList.add("alert");
 		}
-		
+		else if(ecart < 50){
+			ctrl_length_div.classList.add("ko");
+		}
+		else if(ecart < 100){
+			ctrl_length_div.classList.add("warning");
+		}
+		else{
+			ctrl_length_div.classList.add("ok");
+		}
+
 	}
 	
 }
